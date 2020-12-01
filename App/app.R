@@ -1,6 +1,7 @@
 ## app.R ##
 library(shinydashboard)
 library(shiny)
+source("RdailyCasesTimeSeriesPlot.R")
 
 ui <- dashboardPage(
   dashboardHeader(title = "COVID-19 Predictions"),
@@ -23,7 +24,7 @@ ui <- dashboardPage(
                   h2("Dashboard tab content")
               ),
               fluidRow(
-                box(plotOutput("plot1", height = 250)),
+                box(plotOutput("dailyCasesPlot", height = 250)),
                 
                 box(
                   title = "Controls",
@@ -52,6 +53,9 @@ server <- function(input, output) {
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
+  })
+  
+  output$dailyCasesPlot <- renderPlot({
   })
 }
 
