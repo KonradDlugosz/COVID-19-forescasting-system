@@ -25,7 +25,6 @@ dailyCasesTimeSeriesPlot <- function(){
   
   # Convert list to data-frame:
   dailyCases <- as.data.frame(do.call(cbind, data$data))
-  first28Cases <- dailyCases[1:28,]
   
   #correct date format:
   dailyCases <- dailyCases %>% 
@@ -37,8 +36,7 @@ dailyCasesTimeSeriesPlot <- function(){
     arrange(desc(newCases))
   
   # plot time Series NewCases:
-  dailyCases %>% 
-    ggplot( aes(x=date, y=newCases)) +
+  dailyCasesTimeSeriesPlot <-  ggplot(data = dailyCases, aes(x=date, y=newCases)) +
     geom_line(color="#69b3a2") +
     geom_area(fill="#69b3a2", alpha=0.5) +
     ylim(0,40000) +
@@ -48,5 +46,6 @@ dailyCasesTimeSeriesPlot <- function(){
     geom_hline(yintercept=avgNumberOfCases, color="orange", size=.5) +
     theme_ipsum()
   
+  return(dailyCasesTimeSeriesPlot)
   
 }

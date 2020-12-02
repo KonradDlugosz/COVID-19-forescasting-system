@@ -1,7 +1,9 @@
 ## app.R ##
 library(shinydashboard)
 library(shiny)
-source("RdailyCasesTimeSeriesPlot.R")
+library(ggplot2)
+
+source("dailyCasesTimeSeriesPlot.R")
 
 ui <- dashboardPage(
   dashboardHeader(title = "COVID-19 Predictions"),
@@ -16,22 +18,26 @@ ui <- dashboardPage(
   ## Body content
   dashboardBody(
     tabItems(
+      
       # First tab content--------------------------
       tabItem(tabName = "dashboard",
               div(id = 'main_message',
                   #(src = "covid img.png", style="width:100%"),
-                  h1('Welcome to COVID - 19 prediction system', style = "color:#0059b3", align = "center" ) ,
-                  h2("Dashboard tab content")
+                  h1('Welcome to COVID - 19 forecasting system', align = "center", style="font-family:verdana;" ),
+                  p("In this system, I present forecasting algorithms for COVID-19 virus which can predict possible outcomes.",style="font-family:verdana;", align = "center")
+                  
               ),
               fluidRow(
-                box(plotOutput("dailyCasesPlot", height = 250)),
-                
-                box(
-                  title = "Controls",
-                  sliderInput("slider", "Number of observations:", 1, 100, 50)
+                column(width = 6, 
+                  box(
+                    title = "Daily Cases in UK", width = NULL, solidHeader = TRUE, status = "primary",
+                    plotOutput("dailyCasesPlot")
+                  ),
                 )
+                
               )
       ),
+      
       
       # Second tab content-----------------------
       tabItem(tabName = "summary",
@@ -48,15 +54,11 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
   set.seed(122)
-  histdata <- rnorm(500)
-  
-  output$plot1 <- renderPlot({
-    data <- histdata[seq_len(input$slider)]
-    hist(data)
-  })
   
   output$dailyCasesPlot <- renderPlot({
+    dailyCasesTimeSeriesPlot()
   })
+  
 }
 
 shinyApp(ui, server)
