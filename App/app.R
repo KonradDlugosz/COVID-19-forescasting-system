@@ -3,16 +3,18 @@ library(shinydashboard)
 library(shiny)
 library(ggplot2)
 
-source("dailyCasesTimeSeriesPlot.R")
+source("dailyTimeSeriesPlot.R")
+source("mainPageValueBoxReturns.R")
 
 ui <- dashboardPage(
-  dashboardHeader(title = "COVID-19 Predictions"),
+  dashboardHeader(title = "COVID-19"),
   dashboardSidebar(
     sidebarMenu(
       ##Source for icons https://fontawesome.com/
       menuItem("Dashboard", tabName = "dashboard", icon = icon("virus")),
       menuItem("Summary", tabName = "summary", icon = icon("database")),
-      menuItem("Predictions", tabName = "predictions", icon = icon("laptop-code"))
+      menuItem("Forecasting", tabName = "forecasting", icon = icon("laptop-code")),
+      menuItem("About", tabName = "about", icon = icon("user-secret"))
     )
   ),
   ## Body content
@@ -21,18 +23,26 @@ ui <- dashboardPage(
       
       # First tab content--------------------------
       tabItem(tabName = "dashboard",
-              div(id = 'main_message',
-                  #(src = "covid img.png", style="width:100%"),
-                  h1('Welcome to COVID - 19 forecasting system', align = "center", style="font-family:verdana;" ),
-                  p("In this system, I present forecasting algorithms for COVID-19 virus which can predict possible outcomes.",style="font-family:verdana;", align = "center")
-                  
-              ),
               fluidRow(
-                column(width = 6, 
-                  box(
-                    title = "Daily Cases in UK", width = NULL, solidHeader = TRUE, status = "primary",
-                    plotOutput("dailyCasesPlot")
-                  ),
+                column(width = 8,
+                  #Dashboard page boxes - Start
+                  h2("UK Statistics on Coronavirus", style="font-family:verdana;" ),
+                  valueBoxOutput("Cases"),
+                  valueBoxOutput("Deaths"),
+                  valueBoxOutput("Tests")
+                  
+                )
+              ),
+              
+              fluidRow(
+                column(width = 12, 
+                  tabBox(
+                    title = "Daily Time series plots",
+                    side = "right", height = "350px", width = 12, 
+                    selected = "Cases",
+                    tabPanel("Cases", plotOutput("dailyCasesPlot")),
+                    tabPanel("Deaths", plotOutput("dailyDeathsPlot"))
+                  )
                 )
                 
               )
@@ -45,19 +55,55 @@ ui <- dashboardPage(
       ),
       
       # Third tab content------------------------
-      tabItem(tabName = "predictions",
-              h2("Predictions tab content")
-      )
+      tabItem(tabName = "forecasting",
+              h2("Forecasting tab content")
+      ),
+      
+      # Forth tab content------------------------
+      tabItem(tabName = "about")
     )
   )
 )
 
 server <- function(input, output) {
   set.seed(122)
+  #Dashboard start -----------------------------------------------------------
+  
+  output$Cases <- renderValueBox({
+    
+    valueBox(
+      totalDailyCasesUK(), "Total Cases", icon = icon("briefcase-medical"),
+      color = "orange"
+    )
+  })
+  
+  output$Deaths <- renderValueBox({
+    
+    valueBox(
+      totalDailyDeathsUK(), "Total deaths within 28 days of possitve test", icon = icon("skull-crossbones"),
+      color = "red"
+    )
+  })
+  
+  output$Tests <- renderValueBox({
+    
+    valueBox(
+      totalNumberOfTests(), "Total tests", icon = icon("vials"),
+      color = "green"
+    )
+  })
+
+  
   
   output$dailyCasesPlot <- renderPlot({
     dailyCasesTimeSeriesPlot()
   })
+  
+  output$dailyDeathsPlot <- renderPlot({
+    dailyDeathsTimeSeriesPlot()
+  })
+  
+  #Dashboard End -----------------------------------------------------------
   
 }
 
