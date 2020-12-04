@@ -37,11 +37,15 @@ ui <- dashboardPage(
               fluidRow(
                 column(width = 12, 
                   tabBox(
-                    title = "Daily Time series plots",
+                    title = "Time series plot for Cases",
                     side = "right", height = "350px", width = 12, 
-                    selected = "Cases",
-                    tabPanel("Cases", plotOutput("dailyCasesPlot")),
-                    tabPanel("Deaths", plotOutput("dailyDeathsPlot"))
+                    selected = "Daily",
+                    tabPanel("Daily", 
+                             plotOutput("dailyCasesPlot")),
+                    tabPanel("Linear", 
+                             plotOutput("dailyCasesLinearPlot"))
+                    #tabPanel("Deaths", 
+                         #    plotOutput("dailyDeathsPlot"))
                   )
                 )
                 
@@ -78,7 +82,6 @@ server <- function(input, output) {
   })
   
   output$Deaths <- renderValueBox({
-    
     valueBox(
       totalDailyDeathsUK(), "Total deaths within 28 days of possitve test", icon = icon("skull-crossbones"),
       color = "red"
@@ -86,7 +89,6 @@ server <- function(input, output) {
   })
   
   output$Tests <- renderValueBox({
-    
     valueBox(
       totalNumberOfTests(), "Total tests", icon = icon("vials"),
       color = "green"
@@ -99,8 +101,13 @@ server <- function(input, output) {
     dailyCasesTimeSeriesPlot()
   })
   
+  output$dailyCasesLinearPlot <- renderPlot({
+    dailyCasesLinear()
+  })
+  
   output$dailyDeathsPlot <- renderPlot({
     dailyDeathsTimeSeriesPlot()
+    
   })
   
   #Dashboard End -----------------------------------------------------------
