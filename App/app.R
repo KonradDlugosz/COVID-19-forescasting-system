@@ -21,10 +21,11 @@ ui <- dashboardPage(
   dashboardBody(
     tabItems(
       
-      # First tab content--------------------------
+      ### First tab content ###
       tabItem(tabName = "dashboard",
               fluidRow(
                 column(width = 8,
+                       
                   #Dashboard page boxes - Start
                   h2("UK Statistics on Coronavirus", style="font-family:verdana;" ),
                   valueBoxOutput("Cases"),
@@ -36,34 +37,33 @@ ui <- dashboardPage(
               
               fluidRow(
                 column(width = 12, 
-                  tabBox(
-                    title = "Time series plot for Cases",
-                    side = "right", height = "350px", width = 12, 
-                    selected = "Daily",
-                    tabPanel("Daily", 
-                             plotOutput("dailyCasesPlot")),
-                    tabPanel("Linear", 
-                             plotOutput("dailyCasesLinearPlot"))
-                    #tabPanel("Deaths", 
-                         #    plotOutput("dailyDeathsPlot"))
-                  )
+                       box(
+                         status = "warning", br(), height = "500px", width = 12,
+                         sidebarPanel(
+                           h3("Customise the plot: "), br(),
+                           selectInput("plotData", choices = c("New cases", "Deaths"), label = "Select data: "),
+                           selectInput("plotType", choices = c("Daily", "Commutative"), label = "Select plot type: "),
+                           checkboxInput("checkBoxMA", label = "Moving Average", value = FALSE) ### Disable when commutative selected  TO DO ####
+                         ),
+                         mainPanel(
+                           plotOutput("plotOutput")
+                         ))
+                       )
                 )
-                
-              )
       ),
       
-      
-      # Second tab content-----------------------
+      ### Second tab content ###
       tabItem(tabName = "summary",
               h2("Summary tab content")
       ),
+    
       
-      # Third tab content------------------------
+      ### Third tab content ###
       tabItem(tabName = "forecasting",
               h2("Forecasting tab content")
       ),
       
-      # Forth tab content------------------------
+      ### Forth tab content  ###
       tabItem(tabName = "about")
     )
   )
@@ -95,19 +95,26 @@ server <- function(input, output) {
     )
   })
 
-  
-  
-  output$dailyCasesPlot <- renderPlot({
-    dailyCasesTimeSeriesPlot()
-  })
-  
-  output$dailyCasesLinearPlot <- renderPlot({
-    dailyCasesLinear()
-  })
-  
-  output$dailyDeathsPlot <- renderPlot({
-    dailyDeathsTimeSeriesPlot()
-    
+  # Plot mechanism selection render
+  output$plotOutput <- renderPlot({
+    if(input$plotData == "New cases"){
+      
+      if(input$plotType == "Daily"){
+        dailyCasesTimeSeriesPlot(input$checkBoxMA)
+      }
+      else if(input$plotType == "Commutative"){    
+        dailyCasesLinear()
+      }
+    }
+    else if(input$plotData == "Deaths"){
+      
+      if(input$plotType == "Daily"){
+        dailyDeathsTimeSeriesPlot(input$checkBoxMA)
+      }
+      else if(input$plotType == "Commutative"){
+        dailyCommutativeDeathsPlot()
+      }
+    }
   })
   
   #Dashboard End -----------------------------------------------------------
