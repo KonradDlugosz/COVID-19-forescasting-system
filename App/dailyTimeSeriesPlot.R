@@ -1,11 +1,12 @@
 #Receive data from this source
 source("httpRequest.R")
 library(ggplot2)
+library(TTR)
 
 ### Global Variable ###
 k = 7
 
-dailyCasesTimeSeriesPlot <- function(checkBoxMA){
+dailyCasesTimeSeriesPlot <- function(checkBoxMA, checkBoxEMA){
   
   # Data prep
   dailyCases <- getDailyCasesData("dailyCases")
@@ -18,22 +19,28 @@ dailyCasesTimeSeriesPlot <- function(checkBoxMA){
   
   plotScale <- max(dailyCases$newCases) + 1000
   
-  # Calculate predictions(Moving Average)
-  dailyCases$Prediction <- TTR::SMA(dailyCases$newCases, n = k)
+  ### Moving Averages ###
+  # Calculate SMA
+  dailyCases$SMA <- TTR::SMA(dailyCases$newCases, n = k)
+  # Calculate EMA 
+  dailyCases$EMA <- TTR::EMA(dailyCases$newCases, n = k)
   
   # plot time Series NewCases:
   dailyCasesTimeSeriesPlot <-  ggplot(data = dailyCases, aes(x=date, y=newCases)) +
     ggtitle("Daily cases")+
     xlab("Date")+
     ylab("New Cases")+
-    geom_line(color="#FF6B33", size = 1.2) +
+    geom_line(color="#FF6B33", size = 1.2, alpha = 0.9 ) +
     geom_area(fill="#FF8E64", alpha=0.9) +
     ylim(0,plotScale) +
     theme_ipsum()
   
   # Check if Moving average should be applied 
   if(checkBoxMA == TRUE){
-    dailyCasesTimeSeriesPlot <- dailyCasesTimeSeriesPlot + geom_line(data = dailyCases, aes(x = date, y = Prediction), color = "blue", size = 1.2, alpha = 0.7)
+    dailyCasesTimeSeriesPlot <- dailyCasesTimeSeriesPlot + geom_line(data = dailyCases, aes(x = date, y = SMA, color = "Weekly Simple moving average"), color = "blue", size = 1.2, alpha = 0.7)
+  }
+  if(checkBoxEMA == TRUE){
+    dailyCasesTimeSeriesPlot <- dailyCasesTimeSeriesPlot + geom_line(data = dailyCases, aes(x = date, y = EMA, color = "Weekly Exponential moving average"), color = "purple", size = 1.2, alpha = 0.7) 
   }
   
   return(dailyCasesTimeSeriesPlot)
@@ -80,7 +87,7 @@ dailyCasesLinear <- function(){
   
 }
 
-dailyDeathsTimeSeriesPlot <- function (checkBoxMA){
+dailyDeathsTimeSeriesPlot <- function (checkBoxMA, checkBoxEMA){
   
   # Data preparation
   dailyDeaths <- getDailyCasesData("dailyDeaths")
@@ -90,11 +97,14 @@ dailyDeathsTimeSeriesPlot <- function (checkBoxMA){
   
   plotScale <- max(dailyDeaths$newDeaths28DaysByDeathDate) + 500
   
+  ### Moving Averages ###
   # Calculate predictions(Moving Average)
-  dailyDeaths$Prediction <- TTR::SMA(dailyDeaths$newDeaths28DaysByDeathDate, n = k)
+  dailyDeaths$SMA <- TTR::SMA(dailyDeaths$newDeaths28DaysByDeathDate, n = k)
+  dailyDeaths$EMA <- TTR::EMA(dailyDeaths$newDeaths28DaysByDeathDate, n = k)
+  
   
   dailyDeathsTimeSeriesPlot <-  ggplot(data = dailyDeaths, aes(x=date, y=newDeaths28DaysByDeathDate)) +
-    geom_line(color="#FF3A30", size = 1.2) +
+    geom_line(color="#FF3A30", size = 1.2, alpha=0.9) +
     geom_area(fill="#FF655D", alpha=0.9) +
     ggtitle("Daily deaths") + 
     xlab("Date")+
@@ -104,7 +114,10 @@ dailyDeathsTimeSeriesPlot <- function (checkBoxMA){
   
   # Check if Moving average should be applied 
   if(checkBoxMA == TRUE){
-    dailyDeathsTimeSeriesPlot <- dailyDeathsTimeSeriesPlot + geom_line(data = dailyDeaths, aes(x = date, y = Prediction), color = "blue", size = 1.2, alpha = 0.7)
+    dailyDeathsTimeSeriesPlot <- dailyDeathsTimeSeriesPlot + geom_line(data = dailyDeaths, aes(x = date, y = SMA), color = "blue", size = 1.2, alpha = 0.7)
+  }
+  if(checkBoxEMA == TRUE){
+    dailyDeathsTimeSeriesPlot <- dailyDeathsTimeSeriesPlot + geom_line(data = dailyDeaths, aes(x = date, y = EMA), color = "purple", size = 1.2, alpha = 0.7) 
   }
   
   return(dailyDeathsTimeSeriesPlot)
