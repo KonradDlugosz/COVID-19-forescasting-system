@@ -1,0 +1,33 @@
+@import url("//fonts.googleapis.com/css?family=Lobster|Cabin:400,700");
+
+h1 {
+  font-family: 'Lobster', cursive;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #ad1d28;
+}
+
+body {
+  background-color: #fff;
+}
+
+#controls {
+  /* Appearance */
+  background-color: white;
+  padding: 0 10px 10px 10px;
+  cursor: move;
+  opacity: 0.8;
+  transition: opacity 500ms 1s;
+}
+
+#map-info-cases { 
+  padding-left: 10px;
+  color:#3366ff;
+  font-style: oblique;
+}
+
+#map-info-deaths {
+  padding-left: 10px;
+  color:#ff3333;
+  font-style: oblique;
+}

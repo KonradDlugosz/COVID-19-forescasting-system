@@ -1,5 +1,5 @@
-#Receive data from this source
-source("httpRequest.R")
+### Sources ####
+source("data/httpRequest.R")
 
 totalDailyCasesUK <- function(){
   
@@ -10,7 +10,7 @@ totalDailyCasesUK <- function(){
   
   totalCases <- sum(dailyCases$newCases)
   
-  return(totalCases)
+  return(formatLargeNumber(totalCases))
 }
 
 totalDailyDeathsUK <- function(){
@@ -22,7 +22,7 @@ totalDailyDeathsUK <- function(){
   
   totalDeaths <- sum(dailyDeaths$newDeaths28DaysByDeathDate)
   
-  return(totalDeaths)
+  return(formatLargeNumber(totalDeaths))
 }
 
 totalNumberOfTests <- function(){
@@ -35,6 +35,13 @@ totalNumberOfTests <- function(){
   totaldailynewTests <- sum(dailynewTestsByPublishDate$newTestsByPublishDate)
   
   
-  return(totaldailynewTests)
+  return(formatLargeNumber(totaldailynewTests))
+}
+
+formatLargeNumber <- function(number){
+  
+  formatedNumber<-format(round(as.numeric(number), 1), nsmall=0, big.mark=",")
+  return(formatedNumber)
+  
 }
 

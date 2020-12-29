@@ -1,5 +1,5 @@
-#Receive data from this source
-source("httpRequest.R")
+### Sources ####
+source("data/httpRequest.R")
 library(ggplot2)
 library(TTR)
 

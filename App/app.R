@@ -4,9 +4,11 @@ library(shiny)
 library(ggplot2)
 
 ### Sources ####
-source("dailyTimeSeriesPlot.R")
-source("mainPageValueBoxReturns.R")
-source("arimaModel.R")
+source("forecasting/dailyTimeSeriesPlot.R")
+source("forecasting/valueBoxesReturns.R")
+source("forecasting/arimaModel.R")
+source("data/covid19Data.R")
+source("map/baseMap.R")
 
 ### Shiny app ###
 ui <- dashboardPage(
@@ -27,27 +29,34 @@ ui <- dashboardPage(
       
       ### First tab content ###
       tabItem(tabName = "dashboard",
-              h2("Dashboard tab content")
+              includeCSS("styles.css"),
+              h1("Dashboard tab content")
       ),
       
       ### Second tab content ###
       tabItem(tabName = "tracker",
-              h2("Summary tab content"),
-              #leafletOutput("map1")
+                leafletOutput("mymap", height = "850"),
+                ### NEEDS UPDATING
+                absolutePanel(id = "controls", class = "panel panel-default",
+                              top = 70, left = "auto",right = 20, bottom = "auto" , width = "auto", fixed=TRUE, height = "auto", 
+                              h3("Global situation: "),
+                              h4(id = "map-info-cases" ,sprintf("Confirmed cases: %s", totalCases())),
+                              h4(id = "map-info-cases" ,sprintf("New cases: %s", totalNewCases())),
+                              h4(id = "map-info-deaths" ,sprintf("Confirmed deaths: %s", totalDeaths())),
+                              h4(id = "map-info-deaths" ,sprintf("New deaths: %s", totalNewDeaths()))
+                              
+                )
       ),
     
       
       ### Third tab content ###
       tabItem(tabName = "forecasting",
-              h2("Forecasting content"),
               fluidRow(
                 column(width = 8,
-                       
                        #Value Boxes
                        valueBoxOutput("Cases"),
                        valueBoxOutput("Deaths"),
                        valueBoxOutput("Tests")
-                       
                 )
               ),
               
@@ -69,9 +78,18 @@ ui <- dashboardPage(
                        
                        box(
                          title = "ARIMA Model", solidHeader = TRUE, collapsible = TRUE, status = "primary", br(), width = 12,
+                         sidebarPanel(
+                           h3("Forecast from ARIMA: "), br(),
+                           selectInput("plotData2", choices = c("New cases", "Deaths"), label = "Select data: "),
+                           sliderInput("movingAvergeNum", "Moving average period:",
+                                       min = 0, max = 50, value = 7),
+                           sliderInput("numberOfForecastDays", "Number of days to forecast:",
+                                       min = 0, max = 50, value = 7),
+                           p("As the number grows, the accuracy decreases.")
+                         ),
                          mainPanel(
                            plotOutput("arimaOutput",  height = "500px")
-                         ))
+                         )),
                 )
               )
       ),
@@ -85,10 +103,13 @@ ui <- dashboardPage(
 server <- function(input, output) {
   set.seed(122)
   
-  # Tracker starts -------------------------------------------------------------
+  # Map starts -----------------------------------------------------------------
+  output$mymap <- renderLeaflet({ 
+    baseMap()
+  })
  
-  # Tracker ends ---------------------------------------------------------------
-  #Forecasting start -----------------------------------------------------------
+  # Map ends -------------------------------------------------------------------
+  # Forecasting start ----------------------------------------------------------
   
   output$Cases <- renderValueBox({
     
@@ -100,7 +121,7 @@ server <- function(input, output) {
   
   output$Deaths <- renderValueBox({
     valueBox(
-      totalDailyDeathsUK(), "Total deaths within 28 days of possitve test", icon = icon("skull-crossbones"),
+      totalDailyDeathsUK(), "Total deaths ", icon = icon("skull-crossbones"),
       color = "red"
     )
   })
@@ -111,7 +132,7 @@ server <- function(input, output) {
       color = "green"
     )
   })
-
+  
   # Plot mechanism selection render
   output$plotOutput <- renderPlot({
     if(input$plotData == "New cases"){
@@ -134,11 +155,19 @@ server <- function(input, output) {
     }
   })
   
-  output$arimaOutput <- renderPlot({
-    ARIMA()
-    })
   
-  #Forecasting End -------------------------------------------------------------
+  # ARIMA Mechanism Selection render
+  output$arimaOutput <- renderPlot({
+    if(input$plotData2 == "New cases"){
+      dailyCasesARIMA(input$movingAvergeNum, input$numberOfForecastDays)
+    }
+    else if(input$plotData2 == "Deaths"){
+      dailyDeathsARIMA(input$movingAvergeNum, input$numberOfForecastDays)
+    }
+    
+  })
+  
+  # Forecasting End ------------------------------------------------------------
   
 }
 
