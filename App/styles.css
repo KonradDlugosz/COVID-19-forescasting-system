@@ -11,23 +11,36 @@ body {
   background-color: #fff;
 }
 
-#controls {
+#stats {
   /* Appearance */
   background-color: white;
-  padding: 0 10px 10px 10px;
+  padding: 0 50px 10px 10px;
   cursor: move;
-  opacity: 0.8;
+  opacity: 0.7;
   transition: opacity 500ms 1s;
 }
 
-#map-info-cases { 
+#controls {
+  /* Appearance */
+  background-color: white;
+  padding: 0 50px 10px 10px;
+  cursor: move;
+  opacity: 0.7;
+  transition: opacity 500ms 1s;
+}
+
+#map-info-new { 
   padding-left: 10px;
-  color:#3366ff;
+  color:#610000;
   font-style: oblique;
 }
 
-#map-info-deaths {
+#map-info-confirmed {
   padding-left: 10px;
-  color:#ff3333;
+  color:#6d4f4f;
   font-style: oblique;
+}
+
+#controls-buttons{
+  padding-left: 20px;
 }

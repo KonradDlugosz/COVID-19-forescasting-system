@@ -36,16 +36,25 @@ ui <- dashboardPage(
       ### Second tab content ###
       tabItem(tabName = "tracker",
                 leafletOutput("mymap", height = "850"),
-                ### NEEDS UPDATING
-                absolutePanel(id = "controls", class = "panel panel-default",
+                # Stats Display
+                absolutePanel(id = "stats", class = "panel panel-default",
                               top = 70, left = "auto",right = 20, bottom = "auto" , width = "auto", fixed=TRUE, height = "auto", 
                               h3("Global situation: "),
-                              h4(id = "map-info-cases" ,sprintf("Confirmed cases: %s", totalCases())),
-                              h4(id = "map-info-cases" ,sprintf("New cases: %s", totalNewCases())),
-                              h4(id = "map-info-deaths" ,sprintf("Confirmed deaths: %s", totalDeaths())),
-                              h4(id = "map-info-deaths" ,sprintf("New deaths: %s", totalNewDeaths()))
-                              
-                )
+                              h4(id = "map-info-new" ,sprintf("New cases (Last 7 days): %s", totalNewCases())),
+                              h5(id = "map-info-confirmed" ,sprintf("Confirmed cases: %s", totalCases())),
+                              h4(id = "map-info-new" ,sprintf("New deaths (Last 7 days): %s", totalNewDeaths())),
+                              h5(id = "map-info-confirmed" ,sprintf("Confirmed deaths: %s", totalDeaths()))),
+              # Controls Display
+              absolutePanel(id = "controls", top = 150, bottom = "auto", right = "auto", height = "auto", width = "auto", fixed = TRUE,
+                            h3("Controls for map: "),
+                            fluidRow( id = "controls-buttons", 
+                                      
+                              actionButton("cases", "Cases"),
+                              actionButton("deaths", "Deaths")
+                            )
+                            
+                            
+                            )
       ),
     
       
@@ -106,6 +115,14 @@ server <- function(input, output) {
   # Map starts -----------------------------------------------------------------
   output$mymap <- renderLeaflet({ 
     baseMap()
+  })
+  
+  observeEvent(input$cases, {
+    casesMap()
+  })
+  
+  observeEvent(input$deaths, {
+    deathsMap()
   })
  
   # Map ends -------------------------------------------------------------------
