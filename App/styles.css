@@ -1,15 +1,68 @@
 @import url("//fonts.googleapis.com/css?family=Lobster|Cabin:400,700");
 
-h1 {
-  font-family: 'Lobster', cursive;
-  font-weight: 500;
-  line-height: 1.1;
-  color: #ad1d28;
-}
-
 body {
   background-color: #fff;
 }
+
+/*DASH*/
+/*Main buttons*/
+
+#btn_totalCases, #btn_totalRecovered, #btn_totalDeaths{
+  width: 150px;
+  height: 150px;
+  font-size: 100px;
+  border-radius: 10px;
+}
+#btn_totalCases {
+  color: #ff6600;
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+#btn_totalCases:hover {
+  color: #cc5200;
+  background-color: #e6e6e6;
+}
+
+#btn_totalRecovered{
+  color: #0066ff;
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+#btn_totalRecovered:hover {
+  color: #0052cc;
+  background-color: #e6e6e6;
+}
+
+#btn_totalDeaths{
+  color: #ff0000;
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+#btn_totalDeaths:hover{
+  color: #cc0000;
+  background-color: #e6e6e6;
+}
+
+
+#btn_plots, #btn_map , #btn_forecasting, #btn_about{
+  width: 130px;
+  height: 130px;
+  font-size: 70px;
+  color: #0066ff;
+  border-radius: 10px;
+  background-color: #ffffff;
+  border-color: #ffffff;
+  
+}
+#btn_plots:hover,#btn_map:hover, #btn_forecasting:hover, #btn_about:hover{
+  color: #0052cc;
+  background-color: #e6e6e6;
+}
+
+/*MAP*/
 
 #stats {
   /* Appearance */
@@ -18,6 +71,9 @@ body {
   cursor: move;
   opacity: 0.7;
   transition: opacity 500ms 1s;
+}
+#stats.thick {
+  font-weight: bold;
 }
 
 #controls {
@@ -44,3 +100,36 @@ body {
 #controls-buttons{
   padding-left: 20px;
 }
+
+/* Buttons Appearance */
+#deaths {
+  width: 100px;
+  height: 100px;
+  font-size: 60px;
+  
+}
+
+#deaths:hover{
+  background-color: #ff5233;
+}
+
+#cases{
+  width: 100px;
+  height: 100px;
+  font-size: 60px;
+}
+
+#cases:hover{
+  background-color: #ff8533;
+}
+
+#recovered{
+  width: 100px;
+  height: 100px;
+  font-size: 60px;
+}
+  
+#recovered:hover{
+  background-color: #3385ff;
+}
+

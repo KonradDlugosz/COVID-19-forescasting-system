@@ -2,20 +2,22 @@
 library(shinydashboard)
 library(shiny)
 library(ggplot2)
+library(shinyWidgets)
 
 ### Sources ####
 source("forecasting/dailyTimeSeriesPlot.R")
 source("forecasting/valueBoxesReturns.R")
 source("forecasting/arimaModel.R")
+source("forecasting/plots.R")
 source("data/covid19Data.R")
 source("map/baseMap.R")
+
 
 ### Shiny app ###
 ui <- dashboardPage(
   dashboardHeader(title = "COVID-19"),
-  dashboardSidebar(
-    sidebarMenu(
-      ##Source for icons https://fontawesome.com/
+  dashboardSidebar( collapsed = TRUE,
+    sidebarMenu( id = "sideBarMenu",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("virus")),
       menuItem("Tracker", tabName = "tracker", icon = icon("map-marked-alt")),
       menuItem("Forecasting", tabName = "forecasting", icon = icon("laptop-code")),
@@ -26,14 +28,32 @@ ui <- dashboardPage(
   ## Body content
   dashboardBody(
     tabItems(
-      
-      ### First tab content ###
+      ### DASHBOARD PAGE START -------------------------------------------------###
       tabItem(tabName = "dashboard",
-              includeCSS("styles.css"),
-              h1("Dashboard tab content")
+              
+              fluidPage(
+                includeCSS("styles.css"),
+                fluidRow(
+                  column(12, align="center",
+                         box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
+                             box(solidHeader = TRUE, width = 4, h1(totalCases()), h3("TOTAL CASES"), 
+                                 actionButton("btn_totalCases", "", icon = icon("globe-europe"))),
+                             box(solidHeader = TRUE, width = 4, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
+                                 actionButton("btn_totalRecovered", "", icon = icon("band-aid"))),
+                             box(solidHeader = TRUE, width = 4, h1(totalDeaths()), h3("TOTAL DEATHS"),
+                                 actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones"))),
+                             br(),
+                             box(solidHeader = TRUE, width = 10, plotOutput("mainTimeSeriesPlot")),
+                             box(solidHeader = TRUE, width = 2, title = "Quick access",
+                                 actionButton("btn_map", "", icon = icon("map")),
+                                 actionButton("btn_plots", "", icon = icon("chart-line")),
+                                 actionButton("btn_about", "",icon = icon("info"))),
+                             )),
+                         )
+              )
       ),
-      
-      ### Second tab content ###
+      #### DASHBOARD ENDS ------------------------------------------------------###
+      ### MAP PAGE STARTS ------------------------------------------------------###
       tabItem(tabName = "tracker",
                 leafletOutput("mymap", height = "850"),
                 # Stats Display
@@ -45,20 +65,18 @@ ui <- dashboardPage(
                               h4(id = "map-info-new" ,sprintf("New deaths (Last 7 days): %s", totalNewDeaths())),
                               h5(id = "map-info-confirmed" ,sprintf("Confirmed deaths: %s", totalDeaths()))),
               # Controls Display
-              absolutePanel(id = "controls", top = 150, bottom = "auto", right = "auto", height = "auto", width = "auto", fixed = TRUE,
-                            h3("Controls for map: "),
+              absolutePanel(id = "controls", top = "auto", bottom = 55, right = "auto", height = "auto", width = "auto", fixed = TRUE,
+                            h2(""),
                             fluidRow( id = "controls-buttons", 
-                                      
-                              actionButton("cases", "Cases"),
-                              actionButton("deaths", "Deaths")
-                            )
-                            
-                            
-                            )
+                              actionButton("cases", "", icon = icon("globe-europe")),
+                              actionButton("deaths", "", icon = icon("skull-crossbones")),
+                              actionButton("recovered", "", icon = icon("band-aid"))
+                              ###NEEDS UPDATING - MAKE THE COLOR CHANGE AFTER COLICKED ###
+                            ))
       ),
     
-      
-      ### Third tab content ###
+      #### MAP ENDS ------------------------------------------------------------###
+      ### FORECASTING PAGE STARTS ----------------------------------------------###
       tabItem(tabName = "forecasting",
               fluidRow(
                 column(width = 8,
@@ -79,7 +97,8 @@ ui <- dashboardPage(
                            selectInput("plotType", choices = c("Daily", "Commutative"), label = "Select plot type: "),
                            h4("Moving Averages: "),
                            checkboxInput("checkBoxMA", label = "Simple Moving Average", value = FALSE),
-                           checkboxInput("checkBoxEMA", label = "Exponential Moving Average", value = FALSE)
+                           checkboxInput("checkBoxEMA", label = "Exponential Moving Average", value = FALSE),
+                           p("Data source: API Gov Uk")
                          ),
                          mainPanel(
                            plotOutput("plotOutput",  height = "500px")
@@ -103,14 +122,55 @@ ui <- dashboardPage(
               )
       ),
       
-      ### Forth tab content  ###
+      ### ABOUT PAGE STARTS ----------------------------------------------------###
       tabItem(tabName = "about")
+      
+      ### ABOUT PAGE ENDS ------------------------------------------------------###
     )
   )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   set.seed(122)
+  
+  # Dash Starts ----------------------------------------------------------------
+  output$mainTimeSeriesPlot <- renderPlot({
+    dailyCasesPlot()
+  })
+  observeEvent(input$btn_totalCases, {
+    output$mainTimeSeriesPlot <- renderPlot({
+      dailyCasesPlot()
+    })
+  })
+  
+  observeEvent(input$btn_totalRecovered, {
+    output$mainTimeSeriesPlot <- renderPlot({
+      dailyRecoveredPlot()
+    })
+  })
+  
+  observeEvent(input$btn_totalDeaths, {
+    output$mainTimeSeriesPlot <- renderPlot({
+      dailyDeathsPlot()
+    })
+  })
+  
+  # Quick access btn
+  observeEvent(input$btn_map, {
+    updateTabItems(session, "sideBarMenu", "tracker")
+  })
+  observeEvent(input$btn_plots, {
+    updateTabItems(session, "sideBarMenu", "forecasting")
+  })
+  observeEvent(input$btn_about, {
+    updateTabItems(session, "sideBarMenu", "about")
+  })
+  
+  
+  # Data table
+
+  
+  # Dash Ends ------------------------------------------------------------------
   
   # Map starts -----------------------------------------------------------------
   output$mymap <- renderLeaflet({ 
@@ -118,18 +178,21 @@ server <- function(input, output) {
   })
   
   observeEvent(input$cases, {
-    casesMap()
+    casesMap("mymap")
   })
   
   observeEvent(input$deaths, {
-    deathsMap()
+    deathsMap("mymap")
+  })
+  
+  observeEvent(input$recovered, {
+    recoveredMap("mymap")
   })
  
   # Map ends -------------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------
   
   output$Cases <- renderValueBox({
-    
     valueBox(
       totalDailyCasesUK(), "Total Cases", icon = icon("briefcase-medical"),
       color = "orange"

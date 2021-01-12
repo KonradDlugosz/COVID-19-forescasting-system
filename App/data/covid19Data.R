@@ -5,6 +5,7 @@ library (readr)
 ### Call data ###
 time_series_covid19_confirmed_global<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
 time_series_covid19_deaths_global<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+time_series_covid19_recovered_global<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
 
 ### Global cases ###
 cases <- function(){
@@ -75,3 +76,32 @@ formatLargeNumber <- function(number){
   return(formatedNumber)
   
 }
+
+### Global Recovered ###
+recovered <- function(){
+  return(time_series_covid19_recovered_global)
+}
+
+# Total recovered
+totalRecovered <- function(){
+  data <- recovered()
+  total <- sum(data[ncol(data)])
+  formatedNumber<-formatLargeNumber(total)
+  return(formatedNumber)
+}
+
+# Cases, deaths, recovered in data frame
+TotalStats <- function(){
+  
+  cases <- totalCases()
+  deaths <- totalDeaths()
+  recovered <- totalRecovered()
+  
+  title <- c("Cases", "Deaths", "Recovered")
+  data <- c(cases,deaths, recovered)
+  
+  df <- data.frame(title, data)
+  
+  return(df)
+}
+

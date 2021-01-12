@@ -48,7 +48,7 @@ ARIMAModel <- function(forecastData, movingAvgNum, h, stringDataType){
   
   # Forecast fit model
   fcast <- forecast(fit2, h=h)
-  fcastPlot <- autoplot(fcast) + ggtitle("Forecasting prediction for n days")
+  fcastPlot <- autoplot(fcast) + ggtitle("Forecasting prediction for n days") + theme_ipsum()
   
   return(fcastPlot)
 
