@@ -30,7 +30,6 @@ ui <- dashboardPage(
     tabItems(
       ### DASHBOARD PAGE START -------------------------------------------------###
       tabItem(tabName = "dashboard",
-              
               fluidPage(
                 includeCSS("styles.css"),
                 fluidRow(
@@ -43,7 +42,11 @@ ui <- dashboardPage(
                              box(solidHeader = TRUE, width = 4, h1(totalDeaths()), h3("TOTAL DEATHS"),
                                  actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones"))),
                              br(),
-                             box(solidHeader = TRUE, width = 10, plotOutput("mainTimeSeriesPlot")),
+                             tabBox( width = 10,
+                                   id = "mainTabPanels",
+                                   tabPanel("Map", leafletOutput("mymap", height = "450px")),
+                                   tabPanel("Chart", plotOutput("mainTimeSeriesPlot", height = "450px"))
+                                   ),
                              box(solidHeader = TRUE, width = 2, title = "Quick access",
                                  actionButton("btn_map", "", icon = icon("map")),
                                  actionButton("btn_plots", "", icon = icon("chart-line")),
@@ -55,7 +58,6 @@ ui <- dashboardPage(
       #### DASHBOARD ENDS ------------------------------------------------------###
       ### MAP PAGE STARTS ------------------------------------------------------###
       tabItem(tabName = "tracker",
-                leafletOutput("mymap", height = "850"),
                 # Stats Display
                 absolutePanel(id = "stats", class = "panel panel-default",
                               top = 70, left = "auto",right = 20, bottom = "auto" , width = "auto", fixed=TRUE, height = "auto", 
@@ -101,7 +103,7 @@ ui <- dashboardPage(
                            p("Data source: API Gov Uk")
                          ),
                          mainPanel(
-                           plotOutput("plotOutput",  height = "500px")
+                           plotOutput("plotOutput",  height = "auto")
                          )),
                        
                        box(
@@ -133,29 +135,40 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   set.seed(122)
   
-  # Dash Starts ----------------------------------------------------------------
-  output$mainTimeSeriesPlot <- renderPlot({
-    dailyCasesPlot()
-  })
+  #Dash starts------------------------------------------------------------------
+  
+  # Main Buttons 
   observeEvent(input$btn_totalCases, {
     output$mainTimeSeriesPlot <- renderPlot({
       dailyCasesPlot()
     })
+    casesMap("mymap")
   })
   
   observeEvent(input$btn_totalRecovered, {
     output$mainTimeSeriesPlot <- renderPlot({
       dailyRecoveredPlot()
     })
+    recoveredMap("mymap")
+   
   })
   
   observeEvent(input$btn_totalDeaths, {
     output$mainTimeSeriesPlot <- renderPlot({
       dailyDeathsPlot()
-    })
+    }) 
+    deathsMap("mymap")
   })
   
-  # Quick access btn
+  # Main panel View  
+  output$mymap <- renderLeaflet({ 
+    baseMap()
+  })
+  output$mainTimeSeriesPlot <- renderPlot({
+    dailyCasesPlot()
+  }) 
+  
+  # Quick access buttons 
   observeEvent(input$btn_map, {
     updateTabItems(session, "sideBarMenu", "tracker")
   })
@@ -166,30 +179,7 @@ server <- function(input, output, session) {
     updateTabItems(session, "sideBarMenu", "about")
   })
   
-  
-  # Data table
-
-  
   # Dash Ends ------------------------------------------------------------------
-  
-  # Map starts -----------------------------------------------------------------
-  output$mymap <- renderLeaflet({ 
-    baseMap()
-  })
-  
-  observeEvent(input$cases, {
-    casesMap("mymap")
-  })
-  
-  observeEvent(input$deaths, {
-    deathsMap("mymap")
-  })
-  
-  observeEvent(input$recovered, {
-    recoveredMap("mymap")
-  })
- 
-  # Map ends -------------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------
   
   output$Cases <- renderValueBox({

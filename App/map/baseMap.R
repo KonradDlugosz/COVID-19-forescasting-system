@@ -1,6 +1,7 @@
 ### MAP demo ###
 library(leaflet)
 library (readr)
+library(leaflet.extras)
 source("data/covid19Data.R")
 
 # load data 
@@ -45,6 +46,7 @@ mypalette3 <- colorBin( palette=c("#3385ff", "#001433"), domain=LastDateRecovere
 # Base map
 baseMap <- function(){
   baseMap <-leaflet()%>%
+    addFullscreenControl() %>%
     addProviderTiles(providers$CartoDB.Positron) %>% 
     setView(-10.940800, 21.007900, zoom = 2)
   return(baseMap)

@@ -20,6 +20,25 @@ newConfirmedCases <- function(){
   newcases <- data[endOfWeekDate] - data[startOfWeekDate]
   return(newcases)
 }
+# 7 day % change in New cases
+sevenDayChange <- function(){
+  data <- cases()
+  n2 <- ncol(data)
+  n1 <- s - 8
+  sevenDaysDataAllCountries <- data[n1:n2]
+  sevenDaysData <- colSums(sevenDaysDataAllCountries)
+  newData <-c()
+  difrenceInNewData <- c()
+  for(i in 1:8){
+    newData[i]<- sevenDaysData[i+1] - sevenDaysData[i]
+  }
+  for(i in 1:8){
+    difrenceInNewData[i] <- newData[i+1] - newData[i] 
+  }
+  change <- sum(difrenceInNewData,na.rm=TRUE)
+  changeInProcentage <- change/100
+  ## Check if this is correct
+}
 
 # Total cases 
 totalCases <- function(){
