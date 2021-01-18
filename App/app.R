@@ -19,7 +19,7 @@ ui <- dashboardPage(
   dashboardSidebar( collapsed = TRUE,
     sidebarMenu( id = "sideBarMenu",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("virus")),
-      menuItem("Tracker", tabName = "tracker", icon = icon("map-marked-alt")),
+      menuItem("Plots", tabName = "plots", icon = icon("chart-line")),
       menuItem("Forecasting", tabName = "forecasting", icon = icon("laptop-code")),
       menuItem("About", tabName = "about", icon = icon("user-secret"))
     )
@@ -36,11 +36,14 @@ ui <- dashboardPage(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              box(solidHeader = TRUE, width = 4, h1(totalCases()), h3("TOTAL CASES"), 
-                                 actionButton("btn_totalCases", "", icon = icon("globe-europe"))),
+                                 actionButton("btn_totalCases", "", icon = icon("globe-europe")),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(cases()), "%"))),
                              box(solidHeader = TRUE, width = 4, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
-                                 actionButton("btn_totalRecovered", "", icon = icon("band-aid"))),
+                                 actionButton("btn_totalRecovered", "", icon = icon("band-aid")),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(deaths()), "%"))),
                              box(solidHeader = TRUE, width = 4, h1(totalDeaths()), h3("TOTAL DEATHS"),
-                                 actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones"))),
+                                 actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones")),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(recovered()), "%"))),
                              br(),
                              tabBox( width = 10,
                                    id = "mainTabPanels",
@@ -48,36 +51,26 @@ ui <- dashboardPage(
                                    tabPanel("Chart", plotOutput("mainTimeSeriesPlot", height = "450px"))
                                    ),
                              box(solidHeader = TRUE, width = 2, title = "Quick access",
-                                 actionButton("btn_map", "", icon = icon("map")),
                                  actionButton("btn_plots", "", icon = icon("chart-line")),
+                                 actionButton("btn_forecast", "", icon = icon("laptop-code")),
                                  actionButton("btn_about", "",icon = icon("info"))),
                              )),
                          )
               )
       ),
       #### DASHBOARD ENDS ------------------------------------------------------###
-      ### MAP PAGE STARTS ------------------------------------------------------###
-      tabItem(tabName = "tracker",
-                # Stats Display
-                absolutePanel(id = "stats", class = "panel panel-default",
-                              top = 70, left = "auto",right = 20, bottom = "auto" , width = "auto", fixed=TRUE, height = "auto", 
-                              h3("Global situation: "),
-                              h4(id = "map-info-new" ,sprintf("New cases (Last 7 days): %s", totalNewCases())),
-                              h5(id = "map-info-confirmed" ,sprintf("Confirmed cases: %s", totalCases())),
-                              h4(id = "map-info-new" ,sprintf("New deaths (Last 7 days): %s", totalNewDeaths())),
-                              h5(id = "map-info-confirmed" ,sprintf("Confirmed deaths: %s", totalDeaths()))),
-              # Controls Display
-              absolutePanel(id = "controls", top = "auto", bottom = 55, right = "auto", height = "auto", width = "auto", fixed = TRUE,
-                            h2(""),
-                            fluidRow( id = "controls-buttons", 
-                              actionButton("cases", "", icon = icon("globe-europe")),
-                              actionButton("deaths", "", icon = icon("skull-crossbones")),
-                              actionButton("recovered", "", icon = icon("band-aid"))
-                              ###NEEDS UPDATING - MAKE THE COLOR CHANGE AFTER COLICKED ###
-                            ))
-      ),
-    
-      #### MAP ENDS ------------------------------------------------------------###
+      #### Plots STARTS --------------------------------------------------------###
+      tabItem(tabName = "plots",
+              fluidPage(
+                includeCSS("styles.css"),
+                fluidRow(
+                  column(12, align="center",
+                         box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
+                             selectInput("country", choices = retrunListOfCountries(), label = "Select country: "),
+                             plotOutput("selectedCountryPlot"))),
+                  )
+              )),
+      #### Plots ENDS ----------------------------------------------------------###
       ### FORECASTING PAGE STARTS ----------------------------------------------###
       tabItem(tabName = "forecasting",
               fluidRow(
@@ -88,7 +81,6 @@ ui <- dashboardPage(
                        valueBoxOutput("Tests")
                 )
               ),
-              
               fluidRow(
                 column(width = 12, 
                        box(
@@ -169,10 +161,10 @@ server <- function(input, output, session) {
   }) 
   
   # Quick access buttons 
-  observeEvent(input$btn_map, {
-    updateTabItems(session, "sideBarMenu", "tracker")
-  })
   observeEvent(input$btn_plots, {
+    updateTabItems(session, "sideBarMenu", "plots")
+  })
+  observeEvent(input$btn_forecast, {
     updateTabItems(session, "sideBarMenu", "forecasting")
   })
   observeEvent(input$btn_about, {
@@ -180,6 +172,11 @@ server <- function(input, output, session) {
   })
   
   # Dash Ends ------------------------------------------------------------------
+  # Plots Start ----------------------------------------------------------------
+  output$selectedCountryPlot <- renderPlot({
+    cummulativePlotForSelectedCountry(createTimeSeiresForCountry(input$country))
+  })
+  # Plots Ends -----------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------
   
   output$Cases <- renderValueBox({

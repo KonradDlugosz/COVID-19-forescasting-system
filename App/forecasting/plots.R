@@ -147,5 +147,14 @@ createTimeSeiresForCountry <- function(country){
   
 }
 
-createTimeSeiresForCountry("Andorra")
+cummulativePlotForSelectedCountry <- function(countrySelected){
+  plot <-  ggplot(data = countrySelected, aes(x=betterDates, y=df)) +
+    geom_smooth(color="#FF6B33", size = 1.2)+
+    ggtitle("Commutative cases")+
+    xlab("Date")+
+    ylab("Cases") 
+  
+  return(plot)
+}
+
 

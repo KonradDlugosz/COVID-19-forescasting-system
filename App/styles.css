@@ -47,7 +47,7 @@ body {
 }
 
 
-#btn_plots, #btn_map , #btn_forecasting, #btn_about{
+#btn_plots, #btn_forecast, #btn_about{
   width: 130px;
   height: 130px;
   font-size: 70px;
@@ -57,11 +57,14 @@ body {
   border-color: #ffffff;
   
 }
-#btn_plots:hover,#btn_map:hover, #btn_forecasting:hover, #btn_about:hover{
+#btn_plots:hover, #btn_forecast:hover, #btn_about:hover{
   color: #0052cc;
   background-color: #e6e6e6;
 }
 
+#increase {
+  color:#808080;
+}
 /*MAP*/
 
 #stats {
