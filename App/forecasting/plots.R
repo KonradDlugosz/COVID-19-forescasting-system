@@ -126,7 +126,7 @@ cumulativeDeathsPlot <- function(){
 }
 
 #################################################
-
+# Country based plots
 countries <- casesDataSet[2]
 countries <- countries %>% 
   distinct()
@@ -136,15 +136,32 @@ retrunListOfCountries <- function(){
 }
 
 createTimeSeiresForCountry <- function(country){
+  #Get data of selected country
   df <- casesDataSet %>% 
     filter(casesDataSet[2]== country)
   df <- df[5:numOfCol]
   df<- t(df)
   d <- data.frame(betterDates, df)
   rownames(d) <- NULL
+  # Add Daily change to data frame
+  for(i in 2:nrow(d)){
+    d$daily[i] <- d$df[i] - d$df[i - 1] 
+  }
   
   return(d)
+}
+
+
+dailyPlotForSelectedCountry <- function(countrySelected){
+  plot <-  ggplot(data = countrySelected, aes(x=betterDates, y=daily)) +
+    ggtitle("Daily cases")+
+    xlab("Date")+
+    ylab("New Cases")+
+    geom_line(color="#FF6B33", size = 1.2, alpha = 0.9 ) +
+    geom_area(fill="#FF8E64", alpha=0.9) +
+    theme_ipsum()
   
+  return(plot)
 }
 
 cummulativePlotForSelectedCountry <- function(countrySelected){
@@ -152,9 +169,22 @@ cummulativePlotForSelectedCountry <- function(countrySelected){
     geom_smooth(color="#FF6B33", size = 1.2)+
     ggtitle("Commutative cases")+
     xlab("Date")+
-    ylab("Cases") 
+    ylab("Cases") + 
+    theme_ipsum()
   
   return(plot)
 }
 
+################################################################
+# Neural network 
+
+data <- createTimeSeiresForCountry("Poland")
+
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+# Normalized data
+data$daily[1] <- 1 # add missing value, gives error without it.
+data$daily_norm <- normalize(data$daily)
 

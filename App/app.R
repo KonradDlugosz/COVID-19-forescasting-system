@@ -67,7 +67,8 @@ ui <- dashboardPage(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              selectInput("country", choices = retrunListOfCountries(), label = "Select country: "),
-                             plotOutput("selectedCountryPlot"))),
+                             plotOutput("selectedCountryPlotTotal"),
+                             plotOutput("selectedCountryPlotDaily"))),
                   )
               )),
       #### Plots ENDS ----------------------------------------------------------###
@@ -173,8 +174,11 @@ server <- function(input, output, session) {
   
   # Dash Ends ------------------------------------------------------------------
   # Plots Start ----------------------------------------------------------------
-  output$selectedCountryPlot <- renderPlot({
+  output$selectedCountryPlotTotal <- renderPlot({
     cummulativePlotForSelectedCountry(createTimeSeiresForCountry(input$country))
+  })
+  output$selectedCountryPlotDaily <- renderPlot({
+    dailyPlotForSelectedCountry(createTimeSeiresForCountry(input$country))
   })
   # Plots Ends -----------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------

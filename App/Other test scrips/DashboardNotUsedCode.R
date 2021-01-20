@@ -9,10 +9,6 @@ box( title = "Map", solidHeader = TRUE,collapsible = TRUE, status = "success", w
               
          )
 
-# Select country 
-# selectInput("country", choices = retrunListOfCountries(), label = "Select country: "))
-
-
 ################################################
 #devtools::install_github("hrbrmstr/streamgraph")
 # Library
