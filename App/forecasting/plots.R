@@ -126,7 +126,7 @@ cumulativeDeathsPlot <- function(){
 }
 
 #################################################
-# Country based plots
+# Country based plots functions
 countries <- casesDataSet[2]
 countries <- countries %>% 
   distinct()
@@ -147,36 +147,41 @@ createTimeSeiresForCountry <- function(country){
   for(i in 2:nrow(d)){
     d$daily[i] <- d$df[i] - d$df[i - 1] 
   }
-  
+
   return(d)
 }
 
+returnSumCasesOfCountry <- function(df){
+  dF <- df
+  total<-dF$df[nrow(dF)]
+  return(formatLargeNumber(total))
+}
 
-dailyPlotForSelectedCountry <- function(countrySelected){
+t <- returnSumCasesOfCountry(createTimeSeiresForCountry("Angola"))
+
+plotDailyForSelectedCountry <- function(countrySelected){
   plot <-  ggplot(data = countrySelected, aes(x=betterDates, y=daily)) +
-    ggtitle("Daily cases")+
     xlab("Date")+
     ylab("New Cases")+
     geom_line(color="#FF6B33", size = 1.2, alpha = 0.9 ) +
     geom_area(fill="#FF8E64", alpha=0.9) +
-    theme_ipsum()
+    theme_minimal()
   
   return(plot)
 }
 
-cummulativePlotForSelectedCountry <- function(countrySelected){
+plotCummulativeForSelectedCountry <- function(countrySelected){
   plot <-  ggplot(data = countrySelected, aes(x=betterDates, y=df)) +
     geom_smooth(color="#FF6B33", size = 1.2)+
-    ggtitle("Commutative cases")+
     xlab("Date")+
-    ylab("Cases") + 
-    theme_ipsum()
+    ylab("Cases") +
+    theme_minimal()
   
   return(plot)
 }
 
 ################################################################
-# Neural network 
+# Neural network and achrtecture functions
 
 data <- createTimeSeiresForCountry("Poland")
 

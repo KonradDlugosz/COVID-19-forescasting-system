@@ -1,3 +1,5 @@
+#install.packages("leaflet")
+#install.packages("leaflet.extras")
 ## app.R ##
 library(shinydashboard)
 library(shiny)
@@ -66,9 +68,20 @@ ui <- dashboardPage(
                 fluidRow(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
-                             selectInput("country", choices = retrunListOfCountries(), label = "Select country: "),
-                             plotOutput("selectedCountryPlotTotal"),
-                             plotOutput("selectedCountryPlotDaily"))),
+                             box(width = 6, solidHeader = TRUE, height = "auto",
+                                h3("Test Text: 123,123,412")
+                                 ),
+                             box(width = 6, solidHeader = TRUE, height = "auto",
+                                 selectInput("country", 
+                                             choices = retrunListOfCountries(), 
+                                             label = "Select country: ")
+                                 ),
+                             box(width = 12, solidHeader = TRUE, height = "auto",
+                                 h2("Daily"),
+                                 plotOutput("selectedCountryPlotDaily")),
+                                 h2("Cummulative"),
+                                 plotOutput("selectedCountryPlotTotal")
+                             )),
                   )
               )),
       #### Plots ENDS ----------------------------------------------------------###
@@ -174,11 +187,16 @@ server <- function(input, output, session) {
   
   # Dash Ends ------------------------------------------------------------------
   # Plots Start ----------------------------------------------------------------
-  output$selectedCountryPlotTotal <- renderPlot({
-    cummulativePlotForSelectedCountry(createTimeSeiresForCountry(input$country))
+  timeSriesForSelectedCountry <- reactive({
+    createTimeSeiresForCountry(input$country)
   })
+  
   output$selectedCountryPlotDaily <- renderPlot({
-    dailyPlotForSelectedCountry(createTimeSeiresForCountry(input$country))
+    plotDailyForSelectedCountry(createTimeSeiresForCountry(input$country))
+  })
+  
+  output$selectedCountryPlotTotal <- renderPlot({
+    plotCummulativeForSelectedCountry(createTimeSeiresForCountry(input$country))
   })
   # Plots Ends -----------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------
