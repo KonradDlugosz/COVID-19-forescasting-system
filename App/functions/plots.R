@@ -1,4 +1,5 @@
 ### This file contains code used to generate plots of cases, deaths and recovered cases of COVID-19 ###
+#### Sources ####
 source("data/covid19Data.R")
 library(ggplot2)
 library(TTR)
@@ -46,7 +47,7 @@ timeSeiresCasesDaily <- dailyTimeSeries(timeSeiresCasesCumulative)
 timeSeiresRecoveredDaily <- dailyTimeSeries(timeSeiresRecoveredCumulative)
 timeSeiresDeathsDaily <- dailyTimeSeries(timeSeiresDeathsCumulative)
 
-###  Plots ###
+################ Dashboard plots ################ 
 dailyCasesPlot <- function(){
   
   plotScale <- max(timeSeiresCasesDaily$dailyCases) + 10000
@@ -125,8 +126,7 @@ cumulativeDeathsPlot <- function(){
   return(plot)
 }
 
-#################################################
-# Country based plots functions
+################ Country based plots ################ 
 countries <- casesDataSet[2]
 countries <- countries %>% 
   distinct()
@@ -144,6 +144,7 @@ createTimeSeiresForCountry <- function(country){
   d <- data.frame(betterDates, df)
   rownames(d) <- NULL
   # Add Daily change to data frame
+  d$daily[1] <- 0
   for(i in 2:nrow(d)){
     d$daily[i] <- d$df[i] - d$df[i - 1] 
   }
@@ -157,7 +158,7 @@ returnSumCasesOfCountry <- function(df){
   return(formatLargeNumber(total))
 }
 
-t <- returnSumCasesOfCountry(createTimeSeiresForCountry("Angola"))
+t <- returnSumCasesOfCountry(createTimeSeiresForCountry("Poland"))
 
 plotDailyForSelectedCountry <- function(countrySelected){
   plot <-  ggplot(data = countrySelected, aes(x=betterDates, y=daily)) +
@@ -180,16 +181,37 @@ plotCummulativeForSelectedCountry <- function(countrySelected){
   return(plot)
 }
 
-################################################################
-# Neural network and achrtecture functions
+################ Neural network and achrtecture functions ################
+data <- createTimeSeiresForCountry("Germany")
 
-data <- createTimeSeiresForCountry("Poland")
+df <- ts(data$daily)
 
+fit <- nnetar(df, repeats = 20)
+fcast <- forecast(fit, h = 14 )
+plot(fcast)
+
+forcastedCases <- as.integer(fcast$mean)
+
+for(i in 1:14){
+  newDates[i] <- data$betterDates[nrow(data)] + i
+}
+
+fCases <- data.frame(newDates, forcastedCases)
+
+plot <-  ggplot(NULL) +
+  xlab("Date")+
+  ylab("New Cases")+
+  geom_line(data = data, aes(x=betterDates, y=daily),color="#FF6B33", size = 1.2, alpha = 0.9 ) +
+  geom_area(data = data, aes(x=betterDates, y=daily),fill="#FF8E64", alpha=0.9) +
+  geom_line(data = fCases,aes(x=newDates, y=forcastedCases), color="#cc6600" ,size = 1.2, alpha = 0.9 ) + 
+  geom_area(data = fCases,aes(x=newDates, y=forcastedCases),fill="#ffb366", alpha=0.9)
+
+
+#### Normalize function 
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
-
-# Normalized data
+# Normalize data
 data$daily[1] <- 1 # add missing value, gives error without it.
 data$daily_norm <- normalize(data$daily)
 

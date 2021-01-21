@@ -1,14 +1,3 @@
-box( title = "Map", solidHeader = TRUE,collapsible = TRUE, status = "success", width = 12,
-          leafletOutput("dashMap"),
-            radioGroupButtons(
-                inputId = "dataToDisplay",
-                choices = c(`<i class="fas fa-globe-europe"></i>` = "GlobalCases",
-                            `<i class="fas fa-skull-crossbones"></i>` = "Deaths", 
-                            `<i class="fas fa-band-aid"></i>` = "Recovered"),
-                size = "lg")
-              
-         )
-
 ################################################
 #devtools::install_github("hrbrmstr/streamgraph")
 # Library

@@ -10,9 +10,10 @@ library(shinyWidgets)
 source("forecasting/dailyTimeSeriesPlot.R")
 source("forecasting/valueBoxesReturns.R")
 source("forecasting/arimaModel.R")
-source("forecasting/plots.R")
+source("functions/plots.R")
+source("functions/baseMap.R")
 source("data/covid19Data.R")
-source("map/baseMap.R")
+
 
 
 ### Shiny app ###
