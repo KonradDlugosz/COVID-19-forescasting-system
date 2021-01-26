@@ -12,6 +12,7 @@ source("forecasting/valueBoxesReturns.R")
 source("forecasting/arimaModel.R")
 source("functions/plots.R")
 source("functions/baseMap.R")
+source("functions/forecasting.R")
 source("data/covid19Data.R")
 
 
@@ -193,7 +194,8 @@ server <- function(input, output, session) {
   })
   
   output$selectedCountryPlotDaily <- renderPlot({
-    plotDailyForSelectedCountry(createTimeSeiresForCountry(input$country))
+    #plotDailyForSelectedCountry(createTimeSeiresForCountry(input$country))
+    createNuralNetworkTSForecast(createTimeSeiresForCountry(input$country))
   })
   
   output$selectedCountryPlotTotal <- renderPlot({

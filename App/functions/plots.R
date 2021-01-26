@@ -180,38 +180,3 @@ plotCummulativeForSelectedCountry <- function(countrySelected){
   
   return(plot)
 }
-
-################ Neural network and achrtecture functions ################
-data <- createTimeSeiresForCountry("Germany")
-
-df <- ts(data$daily)
-
-fit <- nnetar(df, repeats = 20)
-fcast <- forecast(fit, h = 14 )
-plot(fcast)
-
-forcastedCases <- as.integer(fcast$mean)
-
-for(i in 1:14){
-  newDates[i] <- data$betterDates[nrow(data)] + i
-}
-
-fCases <- data.frame(newDates, forcastedCases)
-
-plot <-  ggplot(NULL) +
-  xlab("Date")+
-  ylab("New Cases")+
-  geom_line(data = data, aes(x=betterDates, y=daily),color="#FF6B33", size = 1.2, alpha = 0.9 ) +
-  geom_area(data = data, aes(x=betterDates, y=daily),fill="#FF8E64", alpha=0.9) +
-  geom_line(data = fCases,aes(x=newDates, y=forcastedCases), color="#cc6600" ,size = 1.2, alpha = 0.9 ) + 
-  geom_area(data = fCases,aes(x=newDates, y=forcastedCases),fill="#ffb366", alpha=0.9)
-
-
-#### Normalize function 
-normalize <- function(x) {
-  return ((x - min(x)) / (max(x) - min(x)))
-}
-# Normalize data
-data$daily[1] <- 1 # add missing value, gives error without it.
-data$daily_norm <- normalize(data$daily)
-
