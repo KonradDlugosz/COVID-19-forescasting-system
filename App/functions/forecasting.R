@@ -25,11 +25,15 @@ createNuralNetworkTSForecast <- function(countrySelected){
   plot <-  ggplot(NULL) +
     xlab("Date")+
     ylab("New Cases")+
-    geom_line(data = data, aes(x=betterDates, y=daily),color="#ff6600", size = 1.2, alpha = 0.9 ) +
+    geom_line(data = data, aes(x=betterDates, y=daily,color="#ff6600"), size = 1.2, alpha = 0.9 ) +
     geom_area(data = data, aes(x=betterDates, y=daily),fill="#ffa366", alpha=0.9) +
-    geom_line(data = dfForecastedCases,aes(x=newDates, y=forcastedCases), color="#0099ff" ,size = 1.2, alpha = 0.9 ) + 
+    geom_line(data = dfForecastedCases,aes(x=newDates, y=forcastedCases, color="#0099ff") ,size = 1.2, alpha = 0.9 ) + 
     geom_area(data = dfForecastedCases,aes(x=newDates, y=forcastedCases),fill="#66c2ff", alpha=0.9) + 
-    theme_minimal()
+    scale_color_identity(name = "Legend",
+                         breaks = c("#ff6600","#0099ff"),
+                         labels = c("Obsereved", "Forecasted"),
+                         guide = "legend")+
+    theme_minimal(base_size = 18)
 
   return(plot)
 }

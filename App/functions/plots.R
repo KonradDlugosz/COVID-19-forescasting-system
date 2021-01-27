@@ -155,7 +155,7 @@ createTimeSeiresForCountry <- function(country){
 returnSumCasesOfCountry <- function(df){
   dF <- df
   total<-dF$df[nrow(dF)]
-  return(formatLargeNumber(total))
+  return(total)
 }
 
 t <- returnSumCasesOfCountry(createTimeSeiresForCountry("Poland"))

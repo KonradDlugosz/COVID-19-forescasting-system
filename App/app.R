@@ -13,6 +13,7 @@ source("forecasting/arimaModel.R")
 source("functions/plots.R")
 source("functions/baseMap.R")
 source("functions/forecasting.R")
+source("functions/pieChart.R")
 source("data/covid19Data.R")
 
 
@@ -39,7 +40,7 @@ ui <- dashboardPage(
                 fluidRow(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
-                             box(solidHeader = TRUE, width = 4, h1(totalCases()), h3("TOTAL CASES"), 
+                             box(solidHeader = TRUE, width = 4, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
                                  actionButton("btn_totalCases", "", icon = icon("globe-europe")),
                                  h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(cases()), "%"))),
                              box(solidHeader = TRUE, width = 4, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
@@ -52,7 +53,8 @@ ui <- dashboardPage(
                              tabBox( width = 10,
                                    id = "mainTabPanels",
                                    tabPanel("Map", leafletOutput("mymap", height = "450px")),
-                                   tabPanel("Chart", plotOutput("mainTimeSeriesPlot", height = "450px"))
+                                   tabPanel("Chart", plotOutput("mainTimeSeriesPlot", height = "450px")),
+                                   tabPanel("Pie", highchartOutput("casesHighChart"))
                                    ),
                              box(solidHeader = TRUE, width = 2, title = "Quick access",
                                  actionButton("btn_plots", "", icon = icon("chart-line")),
@@ -71,7 +73,8 @@ ui <- dashboardPage(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              box(width = 6, solidHeader = TRUE, height = "auto",
-                                h3("Test Text: 123,123,412")
+                                column(2, align="left", actionBttn(inputId = "backDash", label = NULL, style = "material-circle",  color = "primary",icon = icon("arrow-left")),),
+                                column(10, h3(textOutput("casesInCountry")))
                                  ),
                              box(width = 6, solidHeader = TRUE, height = "auto",
                                  selectInput("country", 
@@ -147,9 +150,15 @@ server <- function(input, output, session) {
   
   # Main Buttons 
   observeEvent(input$btn_totalCases, {
+    
     output$mainTimeSeriesPlot <- renderPlot({
       dailyCasesPlot()
     })
+    
+    output$casesHighChart <- renderHighchart({
+      pieControler("cases")
+    })
+    
     casesMap("mymap")
   })
   
@@ -157,14 +166,23 @@ server <- function(input, output, session) {
     output$mainTimeSeriesPlot <- renderPlot({
       dailyRecoveredPlot()
     })
+    
+    output$casesHighChart <- renderHighchart({
+      pieControler("recovered")
+    })
+    
     recoveredMap("mymap")
-   
   })
   
   observeEvent(input$btn_totalDeaths, {
     output$mainTimeSeriesPlot <- renderPlot({
       dailyDeathsPlot()
     }) 
+    
+    output$casesHighChart <- renderHighchart({
+      pieControler("death")
+    })
+    
     deathsMap("mymap")
   })
   
@@ -175,6 +193,11 @@ server <- function(input, output, session) {
   output$mainTimeSeriesPlot <- renderPlot({
     dailyCasesPlot()
   }) 
+  
+  
+  output$casesHighChart <- renderHighchart({
+    pieControler("cases")
+  })
   
   # Quick access buttons 
   observeEvent(input$btn_plots, {
@@ -189,10 +212,12 @@ server <- function(input, output, session) {
   
   # Dash Ends ------------------------------------------------------------------
   # Plots Start ----------------------------------------------------------------
-  timeSriesForSelectedCountry <- reactive({
-    createTimeSeiresForCountry(input$country)
+  observeEvent(input$backDash, {
+    updateTabItems(session, "sideBarMenu", "dashboard")
   })
-  
+  output$casesInCountry <- renderText({
+    paste("Cases:",formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country))))
+  })
   output$selectedCountryPlotDaily <- renderPlot({
     #plotDailyForSelectedCountry(createTimeSeiresForCountry(input$country))
     createNuralNetworkTSForecast(createTimeSeiresForCountry(input$country))

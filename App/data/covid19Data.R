@@ -38,8 +38,7 @@ dailyChange <- function(dataFrame){
 totalCases <- function(){
   data <- cases()
   total <- sum(data[ncol(data)])
-  formatedNumber<-formatLargeNumber(total)
-  return(formatedNumber)
+  return(total)
 }
 
 # total new Cases - not used 
