@@ -8,8 +8,8 @@ source("data/covid19Data.R")
 time_series_covid19_confirmed_global <- cases()
 time_series_covid19_deaths_global <- deaths()
 time_series_covid19_recovered_global <- recovered()
-newCases <- newConfirmedCases()
-newDeaths <- newConfirmedDeaths()
+newCases <- newCasesWeekly()
+newDeaths <- newDeathsWeekly()
 
 # Last column of the data
 LastDateConfirmed <- as.data.frame(time_series_covid19_confirmed_global[,ncol(time_series_covid19_confirmed_global)])

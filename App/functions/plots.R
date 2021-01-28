@@ -47,6 +47,13 @@ timeSeiresCasesDaily <- dailyTimeSeries(timeSeiresCasesCumulative)
 timeSeiresRecoveredDaily <- dailyTimeSeries(timeSeiresRecoveredCumulative)
 timeSeiresDeathsDaily <- dailyTimeSeries(timeSeiresDeathsCumulative)
 
+## hchart plot - not used (test) 
+hc <- timeSeiresCasesDaily %>%
+  hchart(
+    "line", 
+    hcaes(x = formatedDate , y = dailyCases)
+  )
+
 ################ Dashboard plots ################ 
 dailyCasesPlot <- function(){
   

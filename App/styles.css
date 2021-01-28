@@ -6,7 +6,6 @@ body {
 
 /*DASH*/
 /*Main buttons*/
-
 #btn_totalCases, #btn_totalRecovered, #btn_totalDeaths{
   width: 150px;
   height: 150px;
@@ -64,6 +63,15 @@ body {
 
 #increase {
   color:#808080;
+}
+#info_text {
+  color:#3399ff;
+}
+#info-label {
+  color:#808080;
+}
+#activecases_text {
+  color:#00e6ac;
 }
 /*MAP*/
 

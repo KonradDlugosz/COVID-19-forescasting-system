@@ -7,13 +7,18 @@ time_series_covid19_confirmed_global<- read_csv("https://raw.githubusercontent.c
 time_series_covid19_deaths_global<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
 time_series_covid19_recovered_global<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
 
-### Global cases ###
+#### Global cases ####
 cases <- function(){
   return(time_series_covid19_confirmed_global)
 }
 
+todayCases <- function() {
+  data <- cases()
+  todayCases <- data[ncol(data)] - data[ncol(data) -1]
+  return(sum(todayCases))
+}
 # New Cases
-newConfirmedCases <- function(){
+newCasesWeekly <- function(){
   data <- cases()
   endOfWeekDate <- ncol(data)
   startOfWeekDate <- endOfWeekDate - 7 
@@ -41,22 +46,18 @@ totalCases <- function(){
   return(total)
 }
 
-# total new Cases - not used 
-totalNewCases <- function(){
-  data <- newConfirmedCases()
-  total <-sum(data[,1])
-  formatedNumber<-formatLargeNumber(total)
-  return(formatedNumber)
-  
-}
-
-### Global deaths ###
+#### Global deaths ####
 deaths <- function(){
   return(time_series_covid19_deaths_global)
 }
 
-# New deaths
-newConfirmedDeaths <- function(){
+todayDeaths <- function() {
+  data <- deaths()
+  todayDeaths <- data[ncol(data)] - data[ncol(data) -1]
+  return(sum(todayDeaths))
+} 
+
+newDeathsWeekly <- function(){
   data <- deaths()
   endOfWeekDate <- ncol(data)
   startOfWeekDate <- endOfWeekDate - 7 
@@ -72,26 +73,24 @@ totalDeaths <- function(){
   return(formatedNumber)
 }
 
-# Total new deaths - not used 
-totalNewDeaths <- function(){
-  data <- newConfirmedDeaths()
-  total <-sum(data)
-  formatedNumber<-formatLargeNumber(total)
-  return(formatedNumber)
-  
-}
 
-### Other function ### 
-formatLargeNumber <- function(number){
-  
-  formatedNumber<-format(round(as.numeric(number), 1), nsmall=0, big.mark=",")
-  return(formatedNumber)
-  
-}
-
-### Global Recovered ###
+#### Global Recovered ####
 recovered <- function(){
   return(time_series_covid19_recovered_global)
+}
+
+todayRecovered <- function() {
+  data <- recovered()
+  todayRecovered <- data[ncol(data)] - data[ncol(data) -1]
+  return(sum(todayRecovered))
+} 
+
+weeklyRecovered <- function(){
+  data <- recovered()
+  endOfWeekDate <- ncol(data)
+  startOfWeekDate <- endOfWeekDate - 7 
+  newRecovered <- data[endOfWeekDate] - data[startOfWeekDate]
+  return(sum(newRecovered))
 }
 
 # Total recovered
@@ -117,3 +116,22 @@ TotalStats <- function(){
   return(df)
 }
 
+#### Active cases ####
+todayActiveCases <- function(){
+  active <- todayCases() - todayDeaths() - todayRecovered()
+  return(active)
+}
+
+weeklyActiveCases <- function(){
+  activeWeekly <- sum(newCasesWeekly()) - sum(newDeathsWeekly()) - sum(weeklyRecovered())
+  return(activeWeekly)
+}
+
+
+### Other function ### 
+formatLargeNumber <- function(number){
+  
+  formatedNumber<-format(round(as.numeric(number), 1), nsmall=0, big.mark=",")
+  return(formatedNumber)
+  
+}

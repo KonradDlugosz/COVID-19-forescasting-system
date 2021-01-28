@@ -40,15 +40,26 @@ ui <- dashboardPage(
                 fluidRow(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
-                             box(solidHeader = TRUE, width = 4, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
+                             box(solidHeader = TRUE, width = 4,
+                                 column(1, algin = "left",dropdown(style = "unite", icon = icon("info"), width = "800px", color = "primary",
+                                                    column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days")),
+                                                    column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly())))),
+                                                    column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
+                                                    column(2,h3("Deaths"), h3(id = "info_text",formatLargeNumber(todayDeaths())),h3(id = "info_text",formatLargeNumber(sum(newDeathsWeekly())))),
+                                                    column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases())))
+                                                    )),
+                                 column(11, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
                                  actionButton("btn_totalCases", "", icon = icon("globe-europe")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(cases()), "%"))),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(cases()), "%")))),
+                                 
                              box(solidHeader = TRUE, width = 4, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
                                  actionButton("btn_totalRecovered", "", icon = icon("band-aid")),
                                  h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(deaths()), "%"))),
+                             
                              box(solidHeader = TRUE, width = 4, h1(totalDeaths()), h3("TOTAL DEATHS"),
                                  actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones")),
                                  h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(recovered()), "%"))),
+                             
                              br(),
                              tabBox( width = 10,
                                    id = "mainTabPanels",
@@ -150,15 +161,15 @@ server <- function(input, output, session) {
   
   # Main Buttons 
   observeEvent(input$btn_totalCases, {
-    
+    #Plot
     output$mainTimeSeriesPlot <- renderPlot({
       dailyCasesPlot()
     })
-    
+    # Pie chart
     output$casesHighChart <- renderHighchart({
       pieControler("cases")
     })
-    
+    # Map
     casesMap("mymap")
   })
   
