@@ -1,9 +1,10 @@
-### This file contains code used to generate plots of cases, deaths and recovered cases of COVID-19 ###
+### This file contains code used to generate plots of cases, deaths and recovered cases of COVID-19 DATA R script###
 #### Sources ####
 source("data/covid19Data.R")
 library(ggplot2)
 library(TTR)
 library(dplyr)
+library(highcharter)
 
 casesDataSet <- cases()
 recoveredDataSet <- recovered()
@@ -32,12 +33,12 @@ timeSeiresDeathsCumulative <- cumulitiveTimeSeries(deathsDataSet)
 
 dailyTimeSeries <- function(cumulativeTimeSeries){
   totalC <- cumulativeTimeSeries[,2]
-  dailyCases <- c()
+  daily <- c()
   for(i in 1:length(totalC)-1){
-    dailyCases[i] <- totalC[i+1] - totalC[i]
+    daily[i] <- totalC[i+1] - totalC[i]
   }
-  formatedDate <- betterDates[-1]
-  dailyTimeSeries <- data.frame(formatedDate, dailyCases )
+  Date <- betterDates[-1]
+  dailyTimeSeries <- data.frame(Date, daily )
   
   return(dailyTimeSeries)
 }
@@ -47,57 +48,45 @@ timeSeiresCasesDaily <- dailyTimeSeries(timeSeiresCasesCumulative)
 timeSeiresRecoveredDaily <- dailyTimeSeries(timeSeiresRecoveredCumulative)
 timeSeiresDeathsDaily <- dailyTimeSeries(timeSeiresDeathsCumulative)
 
-## hchart plot - not used (test) 
-hc <- timeSeiresCasesDaily %>%
-  hchart(
-    "line", 
-    hcaes(x = formatedDate , y = dailyCases)
-  )
-
 ################ Dashboard plots ################ 
+#!!!!!!!!!!!!!!!!!!!!! COLOR OF PLOTS NEEDS CHANGING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 dailyCasesPlot <- function(){
+  # Correct column name 
+  df <- timeSeiresCasesDaily %>% 
+    rename(`Daily cases` = daily)
   
-  plotScale <- max(timeSeiresCasesDaily$dailyCases) + 10000
-  
-  plot <-  ggplot(data = timeSeiresCasesDaily, aes(x=formatedDate, y=dailyCases)) +
-    ggtitle("Daily cases")+
-    xlab("Date")+
-    ylab("Cases")+
-    geom_line(color="#ff6600", size = 1.2, alpha = 0.9 ) +
-    geom_area(fill="#ffa366", alpha=0.5) +
-    ylim(0,plotScale) +
-    theme_minimal()
-  return(plot)
+  hc <- df %>%
+    hchart(
+      "line", 
+      hcaes(x = Date , y = `Daily cases`)
+    )
+  return(hc)
 }
 
 dailyRecoveredPlot <- function(){
+  # Correct column name 
+  df <- timeSeiresRecoveredDaily %>% 
+    rename(`Daily recovered` = daily)
   
-  plotScale <- max(timeSeiresRecoveredDaily$dailyCases) + 10000
-  
-  plot <-  ggplot(data = timeSeiresRecoveredDaily, aes(x=formatedDate, y=dailyCases)) +
-    ggtitle("Daily recovered")+
-    xlab("Date")+
-    ylab("Recovered")+
-    geom_line(color="#0066ff", size = 1.2, alpha = 0.9 ) +
-    geom_area(fill="#66a3ff", alpha=0.5) +
-    ylim(0,plotScale) +
-    theme_minimal()
-  return(plot)
+  hc <- df %>%
+    hchart(
+      "line", 
+      hcaes(x = Date , y = `Daily recovered` )
+    )
+  return(hc)
 }
 
 dailyDeathsPlot <- function(){
+  # Correct column name 
+  df <- timeSeiresDeathsDaily %>% 
+    rename(`Daily deaths` = daily)
   
-  plotScale <- max(timeSeiresDeathsDaily$dailyCases) + 10000
-  
-  plot <-  ggplot(data = timeSeiresDeathsDaily, aes(x=formatedDate, y=dailyCases)) +
-    ggtitle("Daily deaths")+
-    xlab("Date")+
-    ylab("Deaths")+
-    geom_line(color="#ff0000", size = 1.2, alpha = 0.9 ) +
-    geom_area(fill="#ff6666", alpha=0.5) +
-    ylim(0,plotScale) +
-    theme_minimal()
-  return(plot)
+  hc <- df %>%
+    hchart(
+      "line", 
+      hcaes(x = Date , y = `Daily deaths`)
+    )
+  return(hc)
 }
 
 cumulativeCasesPlot <- function(){

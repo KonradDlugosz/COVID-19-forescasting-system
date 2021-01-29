@@ -14,6 +14,7 @@ source("functions/plots.R")
 source("functions/baseMap.R")
 source("functions/forecasting.R")
 source("functions/pieChart.R")
+source("functions/mapHighChart.R")
 source("data/covid19Data.R")
 
 
@@ -41,12 +42,14 @@ ui <- dashboardPage(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              box(solidHeader = TRUE, width = 4,
-                                 column(1, algin = "left",dropdown(style = "unite", icon = icon("info"), width = "800px", color = "primary",
+                                 column(1, algin = "left",dropdown(style = "jelly", icon = icon("info"), width = "800px", color = "primary",
                                                     column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days")),
                                                     column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly())))),
                                                     column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
                                                     column(2,h3("Deaths"), h3(id = "info_text",formatLargeNumber(todayDeaths())),h3(id = "info_text",formatLargeNumber(sum(newDeathsWeekly())))),
-                                                    column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases())))
+                                                    column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases()))),
+                                                    column(12, p(id ="info-label", "Please note this infomration may be incomplete and not 100% accuarate"))
+                                                    
                                                     )),
                                  column(11, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
                                  actionButton("btn_totalCases", "", icon = icon("globe-europe")),
@@ -63,8 +66,8 @@ ui <- dashboardPage(
                              br(),
                              tabBox( width = 10,
                                    id = "mainTabPanels",
-                                   tabPanel("Map", leafletOutput("mymap", height = "450px")),
-                                   tabPanel("Chart", plotOutput("mainTimeSeriesPlot", height = "450px")),
+                                   tabPanel("Map", highchartOutput("dashMap")),
+                                   tabPanel("Chart", highchartOutput("mainTimeSeriesPlot")),
                                    tabPanel("Pie", highchartOutput("casesHighChart"))
                                    ),
                              box(solidHeader = TRUE, width = 2, title = "Quick access",
@@ -148,6 +151,7 @@ ui <- dashboardPage(
       
       ### ABOUT PAGE STARTS ----------------------------------------------------###
       tabItem(tabName = "about")
+      #leafletOutput("mymap", height = "450px")
       
       ### ABOUT PAGE ENDS ------------------------------------------------------###
     )
@@ -157,12 +161,26 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   set.seed(122)
   
-  #Dash starts------------------------------------------------------------------
+  #--------------------------------Dash starts----------------------------------
+  #### Default on start ####
+  #Plot
+  output$mainTimeSeriesPlot <- renderHighchart({
+    dailyCasesPlot()
+  })
+  # Pie chart
+  output$casesHighChart <- renderHighchart({
+    pieControler("cases")
+  })
+  # Map
+  output$dashMap <- renderHighchart({
+    hcmapSelector("cases")
+  })
+  #casesMap("mymap")
   
   # Main Buttons 
   observeEvent(input$btn_totalCases, {
     #Plot
-    output$mainTimeSeriesPlot <- renderPlot({
+    output$mainTimeSeriesPlot <- renderHighchart({
       dailyCasesPlot()
     })
     # Pie chart
@@ -170,11 +188,14 @@ server <- function(input, output, session) {
       pieControler("cases")
     })
     # Map
-    casesMap("mymap")
+    output$dashMap <- renderHighchart({
+      hcmapSelector("cases")
+    })
+    #casesMap("mymap")
   })
   
   observeEvent(input$btn_totalRecovered, {
-    output$mainTimeSeriesPlot <- renderPlot({
+    output$mainTimeSeriesPlot <- renderHighchart({
       dailyRecoveredPlot()
     })
     
@@ -182,11 +203,11 @@ server <- function(input, output, session) {
       pieControler("recovered")
     })
     
-    recoveredMap("mymap")
+    #recoveredMap("mymap")
   })
   
   observeEvent(input$btn_totalDeaths, {
-    output$mainTimeSeriesPlot <- renderPlot({
+    output$mainTimeSeriesPlot <- renderHighchart({
       dailyDeathsPlot()
     }) 
     
@@ -194,20 +215,10 @@ server <- function(input, output, session) {
       pieControler("death")
     })
     
-    deathsMap("mymap")
-  })
-  
-  # Main panel View  
-  output$mymap <- renderLeaflet({ 
-    baseMap()
-  })
-  output$mainTimeSeriesPlot <- renderPlot({
-    dailyCasesPlot()
-  }) 
-  
-  
-  output$casesHighChart <- renderHighchart({
-    pieControler("cases")
+    #deathsMap("mymap")
+    output$dashMap <- renderHighchart({
+      hcmapSelector("deaths")
+    })
   })
   
   # Quick access buttons 
