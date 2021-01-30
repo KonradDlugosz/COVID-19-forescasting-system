@@ -42,7 +42,7 @@ ui <- dashboardPage(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              box(solidHeader = TRUE, width = 4,
-                                 column(1, algin = "left",dropdown(style = "jelly", icon = icon("info"), width = "800px", color = "primary",
+                                 column(1, algin = "left",dropdown(style = "jelly", icon = icon("virus"), width = "800px", color = "primary",
                                                     column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days")),
                                                     column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly())))),
                                                     column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
@@ -86,20 +86,48 @@ ui <- dashboardPage(
                 fluidRow(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
-                             box(width = 6, solidHeader = TRUE, height = "auto",
+                             box(width = 8, solidHeader = TRUE, height = "auto",
                                 column(2, align="left", actionBttn(inputId = "backDash", label = NULL, style = "material-circle",  color = "primary",icon = icon("arrow-left")),),
-                                column(10, h3(textOutput("casesInCountry")))
+                                column(10, 
+                                       column(3, h2("Cases"), h3(id = "info_text",textOutput("casesInCountry"))),
+                                       column(3, h2("Recovered"), h3(id = "info_text",textOutput("recoveredInCountry"))),
+                                       column(3 ,h2("Deaths"), h3(id = "info_text",textOutput("deathsInCountry"))),
+                                       column(3, h2("Active"), h3(id= "activecases_text",textOutput("activeInCountry")))
+                                       )
                                  ),
-                             box(width = 6, solidHeader = TRUE, height = "auto",
+                             box(width = 4, solidHeader = TRUE, height = "auto",
                                  selectInput("country", 
                                              choices = retrunListOfCountries(), 
                                              label = "Select country: ")
                                  ),
                              box(width = 12, solidHeader = TRUE, height = "auto",
-                                 h2("Daily"),
-                                 plotOutput("selectedCountryPlotDaily")),
-                                 h2("Cummulative"),
-                                 plotOutput("selectedCountryPlotTotal")
+                                 mainPanel(
+                                   highchartOutput("selectedCountryPlotDaily"),
+                                   h2("Cummulative"),
+                                   plotOutput("selectedCountryPlotTotal")
+                                   ),
+                                 sidebarPanel( align = "left", id = "sidebarControls",
+                                               h2("Controls"),
+                                               radioGroupButtons(
+                                                 inputId = "switchGraphType",
+                                                 label = "Choose a graph :", 
+                                                 choices = c(`<i class='fa fa-bar-chart'></i>` = "bar", `<i class='fa fa-line-chart'></i>` = "line"),
+                                                 justified = TRUE
+                                               ),
+                                               radioGroupButtons(
+                                                 inputId = "switchData",
+                                                 label = "Choose a graph :", 
+                                                 choices = c(`<i class="fas fa-globe-europe"></i>` = "cases", `<i class="fas fa-band-aid"></i>` = "recovered",
+                                                             `<i class="fas fa-skull-crossbones"></i>`= "deaths", `<i class="fas fa-head-side-mask"></i>`= "a"),
+                                                 justified = TRUE
+                                               ),
+                                               h3("Moving average"),
+                                               switchInput(
+                                                 inputId = "movingAverage",
+                                                 value = TRUE
+                                               )
+                                               ), 
+                                 ),
                              )),
                   )
               )),
@@ -204,6 +232,9 @@ server <- function(input, output, session) {
     })
     
     #recoveredMap("mymap")
+    output$dashMap <- renderHighchart({
+      hcmapSelector("recovered")
+    })
   })
   
   observeEvent(input$btn_totalDeaths, {
@@ -237,17 +268,33 @@ server <- function(input, output, session) {
   observeEvent(input$backDash, {
     updateTabItems(session, "sideBarMenu", "dashboard")
   })
+  # Display country situation
   output$casesInCountry <- renderText({
-    paste("Cases:",formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country))))
+    formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country)))
   })
-  output$selectedCountryPlotDaily <- renderPlot({
-    #plotDailyForSelectedCountry(createTimeSeiresForCountry(input$country))
+  output$recoveredInCountry <- renderText({
+    formatLargeNumber(returnSumRecoveredOfCountry(input$country))
+  })
+  output$deathsInCountry <- renderText({
+    formatLargeNumber(returnSumDeathsOfCountry(input$country))
+  })
+  output$activeInCountry <- renderText({
+    formatLargeNumber(returnSumActiveCasesOfCountry(input$country))
+    
+  })
+  
+  # Interactive plots 
+  output$selectedCountryPlotDaily <- renderHighchart({
     createNuralNetworkTSForecast(createTimeSeiresForCountry(input$country))
   })
   
   output$selectedCountryPlotTotal <- renderPlot({
     plotCummulativeForSelectedCountry(createTimeSeiresForCountry(input$country))
   })
+  
+  # Controls for plots
+  output$value1 <- renderPrint({ input$switchGraphType })
+  output$value2 <- renderPrint({ input$switchData })
   # Plots Ends -----------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------
   

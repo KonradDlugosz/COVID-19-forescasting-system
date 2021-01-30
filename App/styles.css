@@ -73,6 +73,13 @@ body {
 #activecases_text {
   color:#00e6ac;
 }
+
+
+/*PLOTS PAGE*/
+#sidebarControls {
+ opacity: 0.8;
+}
+
 /*MAP*/
 
 #stats {

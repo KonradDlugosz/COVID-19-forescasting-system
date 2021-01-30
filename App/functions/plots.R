@@ -154,17 +154,24 @@ returnSumCasesOfCountry <- function(df){
   return(total)
 }
 
-t <- returnSumCasesOfCountry(createTimeSeiresForCountry("Poland"))
+returnSumRecoveredOfCountry <- function(country){
+  df <- recoveredDataSet %>% 
+    filter(recoveredDataSet[2] == country)
+  return(df[ncol(df)])
+}
 
-plotDailyForSelectedCountry <- function(countrySelected){
-  plot <-  ggplot(data = countrySelected, aes(x=betterDates, y=daily)) +
-    xlab("Date")+
-    ylab("New Cases")+
-    geom_line(color="#FF6B33", size = 1.2, alpha = 0.9 ) +
-    geom_area(fill="#FF8E64", alpha=0.9) +
-    theme_minimal()
-  
-  return(plot)
+returnSumDeathsOfCountry <- function(country){
+  df <- deathsDataSet %>% 
+    filter(deathsDataSet[2] == country)
+  return(df[ncol(df)])
+}
+
+returnSumActiveCasesOfCountry <- function(country){
+  c <- as.numeric(returnSumCasesOfCountry(createTimeSeiresForCountry(country)))
+  r <- as.numeric(returnSumRecoveredOfCountry(country))
+  d <- as.numeric(returnSumDeathsOfCountry(country))
+  a <- c - (r + d)
+  return(a)
 }
 
 plotCummulativeForSelectedCountry <- function(countrySelected){

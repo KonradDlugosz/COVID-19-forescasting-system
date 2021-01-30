@@ -21,22 +21,40 @@ createNuralNetworkTSForecast <- function(countrySelected){
   forcastedCases <- as.integer(fcast$mean)
   dfForecastedCases <- data.frame(newDates, forcastedCases)
   
-  # 4. Make custom plot
-  plot <-  ggplot(NULL) +
-    xlab("Date")+
-    ylab("New Cases")+
-    geom_line(data = data, aes(x=betterDates, y=daily,color="#ff6600"), size = 1.2, alpha = 0.9 ) +
-    geom_area(data = data, aes(x=betterDates, y=daily),fill="#ffa366", alpha=0.9) +
-    geom_line(data = dfForecastedCases,aes(x=newDates, y=forcastedCases, color="#0099ff") ,size = 1.2, alpha = 0.9 ) + 
-    geom_area(data = dfForecastedCases,aes(x=newDates, y=forcastedCases),fill="#66c2ff", alpha=0.9) + 
-    scale_color_identity(name = "Legend",
-                         breaks = c("#ff6600","#0099ff"),
-                         labels = c("Obsereved", "Forecasted"),
-                         guide = "legend")+
-    theme_minimal(base_size = 18)
+
+  plot <-data %>% hchart("line", 
+    hcaes(x = betterDates , y = daily), name = "Observed") %>% 
+    hc_add_series(dfForecastedCases, "line", hcaes(newDates, forcastedCases), name = "Forecast") %>% 
+    hc_xAxis(title = list(text = "Dates")) %>% 
+    hc_yAxis(title = list(text = "Cases"))
 
   return(plot)
 }
+
+# ARIMA MODEL - not used
+#t <- createTimeSeiresForCountry("Poland")
+#rownames(t) <- t[,1]
+#data  <- t  %>% 
+#  select(daily)
+
+#tsData = ts(data$daily)
+#data$clean = tsclean(tsData)
+#data$movingAvg = ma(data$clea, order= 7)
+
+#finalTsData <- ts(na.omit(data$movingAvg), frequency = 7)
+#decomp = stl(finalTsData, s.window = "periodic")
+
+#### DICOMPSITION OF THE DATA - Seasonality, trend, cycle ###
+# Calculate seasonal 
+#count_ma = ts(na.omit(forecastData$cnt_ma), frequency = 7)
+#decomp = stl(count_ma, s.window = "periodic")
+
+#desesonal_cnt <- seasadj(decomp)
+#count_d1 = diff(desesonal_cnt, differences = 1)
+
+
+#x <- stl(log(AirPassengers), "per")
+#hc <- hchart(x)
 
 #### Other functions ####
 # Normalize function 
