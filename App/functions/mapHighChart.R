@@ -8,13 +8,13 @@ countryCodes <-read_csv("https://gist.githubusercontent.com/radcliff/f09c0f88344
 
 hcmapSelector <- function(data){
   if(data == "cases"){
-    return(hcmapGenerator(cases(), "Cases"))
+    return(hcmapGenerator(casesDataSet, "Cases"))
   }
   else if(data == "deaths"){
-    return(hcmapGenerator(deaths(), "Deaths"))
+    return(hcmapGenerator(deathsDataSet, "Deaths"))
   }
   else if(data == "recovered"){
-    return(hcmapGenerator(recovered(), "Recovered"))
+    return(hcmapGenerator(recoveredDataSet, "Recovered"))
   }
 }
 
@@ -34,7 +34,7 @@ hcmapGenerator <- function(df, name){
     df$`Province/State`[28] <- "BO"
     df$`Province/State`[32] <- "BN"
     df$`Province/State`[94] <- "CG"
-    df$`Province/State`[95] <- "CG"
+    df$`Province/State`[95] <- "CD"
     df$`Province/State`[101] <- "CZ"
     df$`Province/State`[143] <- "VA"
     df$`Province/State`[149] <- "IR"
@@ -44,6 +44,8 @@ hcmapGenerator <- function(df, name){
     df$`Province/State`[184] <- "MD"
     df$`Province/State`[190] <- "NA"
     df$`Province/State`[214] <- "RU"
+    df$`Province/State`[218] <- "SS"
+    df$`Province/State`[233] <- "SS"
     df$`Province/State`[240] <- "SY"
     df$`Province/State`[241] <- "TW"
     df$`Province/State`[243] <- "TZ"
@@ -56,6 +58,7 @@ hcmapGenerator <- function(df, name){
     df$`Province/State`[28] <- "BO"
     df$`Province/State`[32] <- "BN"
     df$`Province/State`[79] <- "CG"
+    df$`Province/State`[80] <- "CD"
     df$`Province/State`[86] <- "CZ"
     df$`Province/State`[134] <- "IR"
     df$`Province/State`[154] <- "LY"

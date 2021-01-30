@@ -1,6 +1,4 @@
 # This file contains forecasting methods
-source("functions/plots.R")
-
 #### Neural Network forward feed time series forecast function ####
 createNuralNetworkTSForecast <- function(countrySelected){
   # 1. Load and format data
@@ -8,27 +6,19 @@ createNuralNetworkTSForecast <- function(countrySelected){
   df <- ts(data$daily)
   
   # 2. Train model
-  numDaysToForecast <- 14
+  numDaysToForecast <- 7
   fit <- nnetar(df, repeats = 20)
   fcast <- forecast(fit, h = numDaysToForecast )
-  #plot(fcast)
   
-  # 3. Create dataframe for forcasted values
-  newDates <- data$betterDates[nrow(data)] + 1
+  # 3. Create dataframe for forecasted values
+  newDates <- data$formatedDate[nrow(data)] + 1
   for(i in 1:numDaysToForecast){
-    newDates[i] <- data$betterDates[nrow(data)] + i
+    newDates[i] <- data$formatedDate[nrow(data)] + i
   }
-  forcastedCases <- as.integer(fcast$mean)
-  dfForecastedCases <- data.frame(newDates, forcastedCases)
+  forcast<- as.integer(fcast$mean)
+  dfForecastedCases <- data.frame(newDates, forcast)
   
-
-  plot <-data %>% hchart("line", 
-    hcaes(x = betterDates , y = daily), name = "Observed") %>% 
-    hc_add_series(dfForecastedCases, "line", hcaes(newDates, forcastedCases), name = "Forecast") %>% 
-    hc_xAxis(title = list(text = "Dates")) %>% 
-    hc_yAxis(title = list(text = "Cases"))
-
-  return(plot)
+  return(dfForecastedCases)
 }
 
 # ARIMA MODEL - not used

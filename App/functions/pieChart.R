@@ -1,21 +1,18 @@
 # This file creates interactive pie chart
 # Load required R packages
+source("data/covid19Data.R")
 library(dplyr)
 library(highcharter) 
-source("data/covid19Data.R")
 
 pieControler <- function(cases_death_recovered){
   if(cases_death_recovered == "cases"){
-    cases <- cases()
-    return(piePlotGenerator(cases, "Cases"))
+    return(piePlotGenerator(casesDataSet, "Cases"))
   }
   else if(cases_death_recovered == "death"){
-    deaths <- deaths()
-    return(piePlotGenerator(deaths, "Deaths"))
+    return(piePlotGenerator(deathsDataSet, "Deaths"))
   }
   else if(cases_death_recovered == "recovered"){
-    recovered <- recovered()
-    return(piePlotGenerator(recovered, "Recovered"))
+    return(piePlotGenerator(recoveredDataSet, "Recovered"))
   }
 }
 

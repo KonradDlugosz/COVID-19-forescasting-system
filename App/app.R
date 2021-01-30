@@ -7,17 +7,15 @@ library(ggplot2)
 library(shinyWidgets)
 
 ### Sources ####
+source("data/covid19Data.R")
 source("forecasting/dailyTimeSeriesPlot.R")
 source("forecasting/valueBoxesReturns.R")
 source("forecasting/arimaModel.R")
-source("functions/plots.R")
-source("functions/baseMap.R")
+source("functions/dashPlots.R")
+source("functions/countryPlots.R")
 source("functions/forecasting.R")
 source("functions/pieChart.R")
 source("functions/mapHighChart.R")
-source("data/covid19Data.R")
-
-
 
 ### Shiny app ###
 ui <- dashboardPage(
@@ -42,7 +40,7 @@ ui <- dashboardPage(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              box(solidHeader = TRUE, width = 4,
-                                 column(1, algin = "left",dropdown(style = "jelly", icon = icon("virus"), width = "800px", color = "primary",
+                                 column(1, algin = "left", dropdown(style = "jelly", icon = icon("virus"), width = "800px", color = "primary",
                                                     column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days")),
                                                     column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly())))),
                                                     column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
@@ -53,15 +51,15 @@ ui <- dashboardPage(
                                                     )),
                                  column(11, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
                                  actionButton("btn_totalCases", "", icon = icon("globe-europe")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(cases()), "%")))),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(casesDataSet), "%")))),
                                  
                              box(solidHeader = TRUE, width = 4, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
                                  actionButton("btn_totalRecovered", "", icon = icon("band-aid")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(deaths()), "%"))),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(deathsDataSet), "%"))),
                              
                              box(solidHeader = TRUE, width = 4, h1(totalDeaths()), h3("TOTAL DEATHS"),
                                  actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(recovered()), "%"))),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(recoveredDataSet), "%"))),
                              
                              br(),
                              tabBox( width = 10,
@@ -102,9 +100,7 @@ ui <- dashboardPage(
                                  ),
                              box(width = 12, solidHeader = TRUE, height = "auto",
                                  mainPanel(
-                                   highchartOutput("selectedCountryPlotDaily"),
-                                   h2("Cummulative"),
-                                   plotOutput("selectedCountryPlotTotal")
+                                   highchartOutput("selectedCountryPlotDaily")
                                    ),
                                  sidebarPanel( align = "left", id = "sidebarControls",
                                                h2("Controls"),
@@ -285,11 +281,7 @@ server <- function(input, output, session) {
   
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
-    createNuralNetworkTSForecast(createTimeSeiresForCountry(input$country))
-  })
-  
-  output$selectedCountryPlotTotal <- renderPlot({
-    plotCummulativeForSelectedCountry(createTimeSeiresForCountry(input$country))
+    interactivePlotsMechanism(createTimeSeiresForCountry(input$country),input$switchGraphType)
   })
   
   # Controls for plots
