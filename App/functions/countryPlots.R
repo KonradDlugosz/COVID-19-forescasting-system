@@ -66,32 +66,48 @@ returnSumActiveCasesOfCountry <- function(country){
 }
 
 # 4. Interactive plots:
-interactivePlotsMechanism <- function(countrySelected, plotType){
+interactivePlotsMechanism <- function(countrySelected, plotType, ema){
   if(plotType == "bar"){
-    return(dailyForecastPlot(countrySelected))
+    return(dailyForecastPlot(countrySelected,ema))
   }
   else if(plotType == "line"){
     return(cummulativePlot(countrySelected))
   }
   
 }
-
-dailyForecastPlot <- function(countrySelected){
-  #Forecast data
+#### CASES ####
+dailyForecastPlot <- function(countrySelected, ema){
+  # Forecast data
   forecastData <- createNuralNetworkTSForecast(countrySelected)
-  #Plot the data
+  # Exponential Moving Average
+  countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
+  # Plot the data
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Observed") %>% 
     hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
+  # Check if to apply 
+  if(isTRUE(ema)){
+    plot <- plot %>% hc_add_series(countrySelected, "line", hcaes(formatedDate, EMA), name = "Exponential Moving Average")
+  }
   
   return(plot)
 }
 
 cummulativePlot <- function(countrySelected){
+  # Forecast data
+  forecastData <- createNuralNetworkTSForecast(countrySelected)
+  # Change forecast to cumulative
+  lastDataPoint <- countrySelected$df[nrow(countrySelected)]
+  forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
+  for(i in 2: nrow(forecastData)){
+    forecastData$forcast[i] <- forecastData$forcast[i] + forecastData$forcast[i -1]
+  }
+  
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = df), name = "Observed") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
   

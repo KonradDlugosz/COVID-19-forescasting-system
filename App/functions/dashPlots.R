@@ -6,6 +6,7 @@ library(ggplot2)
 library(TTR)
 library(dplyr)
 library(highcharter)
+library(outliers)
 
 # 1. Format date
 numOfCol <- ncol(casesDataSet)
@@ -45,6 +46,33 @@ dailyTimeSeries <- function(cumulativeTimeSeries){
 timeSeiresCasesDaily <- dailyTimeSeries(timeSeiresCasesCumulative)
 timeSeiresRecoveredDaily <- dailyTimeSeries(timeSeiresRecoveredCumulative)
 timeSeiresDeathsDaily <- dailyTimeSeries(timeSeiresDeathsCumulative)
+
+# Weekly Change 
+weeklyCasesChange <- function(){
+  data <- timeSeiresCasesDaily$daily
+  index <- length(data) - 13
+  twoWeeksData <- data[index:length(data)]
+  
+  firstWeek <- sum(twoWeeksData[1:7])
+  secondWeek <- sum(twoWeeksData[8:14])
+  
+  change <- (firstWeek - secondWeek) / firstWeek * 100
+  procentage <- format(round(change, 2), nsmall = 2)
+  return(toString(procentage)) 
+}
+
+# Outlier detection and correction 
+# CASES:
+outlier <- outlier(timeSeiresCasesDaily$daily)
+casesMean <- mean(timeSeiresCasesDaily$daily)
+outlierCasesIndex <- match(outlier, timeSeiresCasesDaily$daily)
+timeSeiresCasesDaily$daily[outlierCasesIndex] <- casesMean
+
+# RECOVERED: 
+outlier <- outlier(timeSeiresRecoveredDaily$daily)
+casesMean <- mean(timeSeiresRecoveredDaily$daily)
+outlierRecoveredIndex <- match(outlier, timeSeiresRecoveredDaily$daily)
+timeSeiresRecoveredDaily$daily[outlierRecoveredIndex] <- casesMean
 
 #Plots
 dailyCasesPlot <- function(){

@@ -27,10 +27,10 @@ dailyChange <- function(dataFrame){
   data <- dataFrame
   newDate <- ncol(data)
   oldDate <- newDate - 1
-  sevenDaysDataAllCountries <- data[oldDate:newDate]
-  sevenDaysData <- colSums(sevenDaysDataAllCountries)
-  change <- sevenDaysData[2] - sevenDaysData[1]
-  procentage <- change / sevenDaysData[1] * 100
+  twoDaysAllCounties <- data[oldDate:newDate]
+  twoDaysData <- colSums(twoDaysAllCounties)
+  change <- twoDaysData[2] - twoDaysData[1]
+  procentage <- change / twoDaysData[1] * 100
   procentage <- format(round(procentage, 2), nsmall = 2)
   return(toString(procentage))
 }

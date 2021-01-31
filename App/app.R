@@ -41,8 +41,8 @@ ui <- dashboardPage(
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              box(solidHeader = TRUE, width = 4,
                                  column(1, algin = "left", dropdown(style = "jelly", icon = icon("virus"), width = "800px", color = "primary",
-                                                    column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days")),
-                                                    column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly())))),
+                                                    column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days"), h3(id ="info-label","7-days change")),
+                                                    column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly()))), h3(paste(weeklyCasesChange(), "%"))),
                                                     column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
                                                     column(2,h3("Deaths"), h3(id = "info_text",formatLargeNumber(todayDeaths())),h3(id = "info_text",formatLargeNumber(sum(newDeathsWeekly())))),
                                                     column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases()))),
@@ -50,7 +50,7 @@ ui <- dashboardPage(
                                                     
                                                     )),
                                  column(11, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
-                                 actionButton("btn_totalCases", "", icon = icon("globe-europe")),
+                                 actionButton("btn_totalCases", "", icon = icon("head-side-mask")),
                                  h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(casesDataSet), "%")))),
                                  
                              box(solidHeader = TRUE, width = 4, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
@@ -106,22 +106,19 @@ ui <- dashboardPage(
                                                h2("Controls"),
                                                radioGroupButtons(
                                                  inputId = "switchGraphType",
-                                                 label = "Choose a graph :", 
+                                                 label = "Choose graph :", 
                                                  choices = c(`<i class='fa fa-bar-chart'></i>` = "bar", `<i class='fa fa-line-chart'></i>` = "line"),
                                                  justified = TRUE
                                                ),
                                                radioGroupButtons(
                                                  inputId = "switchData",
-                                                 label = "Choose a graph :", 
-                                                 choices = c(`<i class="fas fa-globe-europe"></i>` = "cases", `<i class="fas fa-band-aid"></i>` = "recovered",
-                                                             `<i class="fas fa-skull-crossbones"></i>`= "deaths", `<i class="fas fa-head-side-mask"></i>`= "a"),
+                                                 label = "Choose data :", 
+                                                 choices = c(`<i class="fas fa-head-side-mask"></i>` = "cases",`<i class="fas fa-skull-crossbones"></i>`= "deaths"),
                                                  justified = TRUE
                                                ),
-                                               h3("Moving average"),
-                                               switchInput(
-                                                 inputId = "movingAverage",
-                                                 value = TRUE
-                                               )
+                                               h3("Exponential Moving Average"),
+                                               switchInput(inputId = "movingAverage", value = FALSE),
+                                               p("Forecast done using Feed-forward neural networks")
                                                ), 
                                  ),
                              )),
@@ -281,7 +278,7 @@ server <- function(input, output, session) {
   
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
-    interactivePlotsMechanism(createTimeSeiresForCountry(input$country),input$switchGraphType)
+    interactivePlotsMechanism(createTimeSeiresForCountry(input$country),input$switchGraphType, input$movingAverage)
   })
   
   # Controls for plots
