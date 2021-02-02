@@ -15,15 +15,24 @@ formatedDate <- as.Date(date, format = "%m/%d/%y")
 
 # 2. Get country list
 countries <- casesDataSet[2]
-countries <- countries %>% 
-  distinct()
 
+# Countries accruing more then once
+n_occur <- data.frame(table(casesDataSet[2]))
+duplicatedCountries <- n_occur[n_occur$Freq > 1,]
+  
 createTimeSeiresForCountry <- function(country){
-  #Get data of selected country
-  df <- casesDataSet %>% 
-    filter(casesDataSet[2]== country)
-  df <- df[5:numOfCol]
-  df<- t(df)
+  # Get data of selected country
+  if(country %in% duplicatedCountries$Var1){
+    df <- casesDataSet %>% filter(casesDataSet[2] == country)
+    df<- data.frame( colSums(df[5:numOfCol]))
+    names(df)[1] <- "df"
+  }
+  if(!country %in% duplicatedCountries$Var1) {
+    df <- casesDataSet %>% filter(casesDataSet[2]== country)
+    df <- df[5:numOfCol]
+    df<- t(df)
+  }
+  # Process data 
   d <- data.frame(formatedDate, df)
   rownames(d) <- NULL
   # Add Daily change to data frame
@@ -34,6 +43,14 @@ createTimeSeiresForCountry <- function(country){
   
   return(d)
 }
+
+# incubation period Active cases
+#t <- createTimeSeiresForCountry("Poland")
+#n <- nrow(t)
+#n14 <- nrow(t) - 14
+#sum(t$daily[n:n14])
+
+
 # 3. Return functions
 retrunListOfCountries <- function(){
   return(countries)
@@ -46,15 +63,36 @@ returnSumCasesOfCountry <- function(df){
 }
 
 returnSumRecoveredOfCountry <- function(country){
-  df <- recoveredDataSet %>% 
+  # Combine country into one value if appear more then once
+  if(country %in% duplicatedCountries$Var1){
+    df <- recoveredDataSet %>% filter(recoveredDataSet[2] == country)
+    df<- data.frame( colSums(df[5:numOfCol]))
+    names(df)[1] <- "df"
+    return(df$df[nrow(df)])
+  }
+  # Return country if appears once
+  else if(!country %in% duplicatedCountries$Var1){
+    df <- recoveredDataSet %>% 
     filter(recoveredDataSet[2] == country)
-  return(df[ncol(df)])
+    return(df[ncol(df)])
+  }
+  
 }
 
 returnSumDeathsOfCountry <- function(country){
-  df <- deathsDataSet %>% 
+  # Combine country into one value if appear more then once
+  if(country %in% duplicatedCountries$Var1){
+    df <- deathsDataSet %>% filter(deathsDataSet[2] == country)
+    df<- data.frame( colSums(df[5:numOfCol]))
+    names(df)[1] <- "df"
+    return(df$df[nrow(df)])
+  }
+  # Return country if appears once
+  else if(!country %in% duplicatedCountries$Var1){
+    df <- deathsDataSet %>% 
     filter(deathsDataSet[2] == country)
-  return(df[ncol(df)])
+    return(df[ncol(df)])
+  }
 }
 
 returnSumActiveCasesOfCountry <- function(country){
@@ -66,19 +104,21 @@ returnSumActiveCasesOfCountry <- function(country){
 }
 
 # 4. Interactive plots:
-interactivePlotsMechanism <- function(countrySelected, plotType, ema){
+interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast){
   if(plotType == "bar"){
-    return(dailyForecastPlot(countrySelected,ema))
+    return(dailyForecastPlot(countrySelected,ema,daysToForecast))
   }
   else if(plotType == "line"){
-    return(cummulativePlot(countrySelected))
+    return(cummulativePlot(countrySelected,daysToForecast))
   }
   
 }
 #### CASES ####
-dailyForecastPlot <- function(countrySelected, ema){
+dailyForecastPlot <- function(countrySelected, ema, daysToForecast){
   # Forecast data
-  forecastData <- createNuralNetworkTSForecast(countrySelected)
+  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  # Make MFE as global variable to display in the app
+  #assign("MFE",forecastData$MFE[1], envir = .GlobalEnv)
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data
@@ -95,9 +135,9 @@ dailyForecastPlot <- function(countrySelected, ema){
   return(plot)
 }
 
-cummulativePlot <- function(countrySelected){
+cummulativePlot <- function(countrySelected,daysToForecast){
   # Forecast data
-  forecastData <- createNuralNetworkTSForecast(countrySelected)
+  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
   # Change forecast to cumulative
   lastDataPoint <- countrySelected$df[nrow(countrySelected)]
   forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]

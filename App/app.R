@@ -100,7 +100,8 @@ ui <- dashboardPage(
                                  ),
                              box(width = 12, solidHeader = TRUE, height = "auto",
                                  mainPanel(
-                                   highchartOutput("selectedCountryPlotDaily")
+                                   highchartOutput("selectedCountryPlotDaily"),
+                                   #h3(MFE)
                                    ),
                                  sidebarPanel( align = "left", id = "sidebarControls",
                                                h2("Controls"),
@@ -116,9 +117,21 @@ ui <- dashboardPage(
                                                  choices = c(`<i class="fas fa-head-side-mask"></i>` = "cases",`<i class="fas fa-skull-crossbones"></i>`= "deaths"),
                                                  justified = TRUE
                                                ),
-                                               h3("Exponential Moving Average"),
-                                               switchInput(inputId = "movingAverage", value = FALSE),
-                                               p("Forecast done using Feed-forward neural networks")
+                                               column(8 ,h3("Exponential Moving Average: ")),
+                                               column(4 ,br(),switchInput(inputId = "movingAverage", value = FALSE)),
+                                               knobInput(
+                                                 inputId = "daysToForecast",
+                                                 label = "Days to forecast:",
+                                                 value = 7,
+                                                 min = 0,
+                                                 max = 30,
+                                                 displayPrevious = TRUE,
+                                                 fgColor = "#428BCA",
+                                                 inputColor = "#428BCA"
+                                               ),
+                                               dropdown(style = "jelly", icon = icon("question"), color = "primary",
+                                                        p(id ="info-label","Forecast done using Feed-forward neural networks."),
+                                                        p(id ="info-label", "Plases note, more days to forecast becomes less accurate."))
                                                ), 
                                  ),
                              )),
@@ -184,6 +197,10 @@ server <- function(input, output, session) {
   
   #--------------------------------Dash starts----------------------------------
   #### Default on start ####
+  # Map
+  output$dashMap <- renderHighchart({
+    hcmapSelector("cases")
+  })
   #Plot
   output$mainTimeSeriesPlot <- renderHighchart({
     dailyCasesPlot()
@@ -191,10 +208,6 @@ server <- function(input, output, session) {
   # Pie chart
   output$casesHighChart <- renderHighchart({
     pieControler("cases")
-  })
-  # Map
-  output$dashMap <- renderHighchart({
-    hcmapSelector("cases")
   })
   #casesMap("mymap")
   
@@ -278,7 +291,7 @@ server <- function(input, output, session) {
   
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
-    interactivePlotsMechanism(createTimeSeiresForCountry(input$country),input$switchGraphType, input$movingAverage)
+    interactivePlotsMechanism(createTimeSeiresForCountry(input$country),input$switchGraphType, input$movingAverage,input$daysToForecast)
   })
   
   # Controls for plots
