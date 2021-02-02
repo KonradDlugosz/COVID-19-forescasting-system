@@ -12,16 +12,20 @@ createNuralNetworkTSForecast <- function(countrySelected,daysToForecast){
   # 2. Train model
   fit <- nnetar(df, repeats = 20)
   fcast <- forecast(fit, h = daysToForecast)
-  #mad(fit$residuals, na.rm = TRUE)
   
-  # 3. Create dataframe for forecasted values
+  # 3. Create dataframe for forecast values
   newDates <- data$formatedDate[nrow(data)] + 1
   for(i in 1:daysToForecast){
     newDates[i] <- data$formatedDate[nrow(data)] + i
   }
   forcast<- as.integer(fcast$mean)
   dfForecastedCases <- data.frame(newDates, forcast)
-  dfForecastedCases$MFE <- mean(fit$residuals, na.rm = TRUE)
+  
+  # 4. Check the accuracy of the model
+  squereRootError <- na.omit(fit$residuals) ^ 2
+  meanSquereRootError <- mean(squereRootError)
+  rootMeanSquaredError <- sqrt(meanSquereRootError)
+  dfForecastedCases$rootMeanSquaredError <- ceiling(rootMeanSquaredError)
   
   return(dfForecastedCases)
 }

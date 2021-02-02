@@ -112,13 +112,18 @@ interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToFore
     return(cummulativePlot(countrySelected,daysToForecast))
   }
   
+} 
+
+accurcyOfForecast <- function(countrySelected,daysToForecast){
+  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  rootMeanSquaredError <- forecastData$rootMeanSquaredError[1]
+  return(rootMeanSquaredError)
 }
+
 #### CASES ####
 dailyForecastPlot <- function(countrySelected, ema, daysToForecast){
   # Forecast data
   forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
-  # Make MFE as global variable to display in the app
-  #assign("MFE",forecastData$MFE[1], envir = .GlobalEnv)
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data

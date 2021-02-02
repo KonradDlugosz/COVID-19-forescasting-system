@@ -1,10 +1,14 @@
 #install.packages("leaflet")
 #install.packages("leaflet.extras")
+#install.packages("shinyjs")
+#shinycssloaders
 ## app.R ##
 library(shinydashboard)
 library(shiny)
 library(ggplot2)
 library(shinyWidgets)
+library(shinyjs)
+library(shinycssloaders)
 
 ### Sources ####
 source("data/covid19Data.R")
@@ -100,8 +104,10 @@ ui <- dashboardPage(
                                  ),
                              box(width = 12, solidHeader = TRUE, height = "auto",
                                  mainPanel(
-                                   highchartOutput("selectedCountryPlotDaily"),
-                                   #h3(MFE)
+                                   shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily")),
+                                   column(7, align = "right", h4(textOutput("MFE"))),
+                                   column(5, align = "left",dropdown(style = "jelly", icon = icon("question"), color = "primary",
+                                                      p(id ="info-label","This value shows on average, how many values the forecasat was away from actual.")))
                                    ),
                                  sidebarPanel( align = "left", id = "sidebarControls",
                                                h2("Controls"),
@@ -297,6 +303,9 @@ server <- function(input, output, session) {
   # Controls for plots
   output$value1 <- renderPrint({ input$switchGraphType })
   output$value2 <- renderPrint({ input$switchData })
+  
+  output$MFE <- renderText({ paste("Root Mean Squared Error (RMSE):",accurcyOfForecast(createTimeSeiresForCountry(input$country),input$daysToForecast)) })
+  
   # Plots Ends -----------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------
   
