@@ -20,15 +20,22 @@ countries <- casesDataSet[2]
 n_occur <- data.frame(table(casesDataSet[2]))
 duplicatedCountries <- n_occur[n_occur$Freq > 1,]
   
-createTimeSeiresForCountry <- function(country){
+createTimeSeiresForCountry <- function(country, dataSelector){
+  # Check which data to load, Cases or Deaths
+  if(dataSelector == "cases"){
+    data <- casesDataSet
+  }
+  else if(dataSelector == "deaths"){
+    data <- deathsDataSet
+  }
   # Get data of selected country
   if(country %in% duplicatedCountries$Var1){
-    df <- casesDataSet %>% filter(casesDataSet[2] == country)
+    df <- data %>% filter(data[2] == country)
     df<- data.frame( colSums(df[5:numOfCol]))
     names(df)[1] <- "df"
   }
   if(!country %in% duplicatedCountries$Var1) {
-    df <- casesDataSet %>% filter(casesDataSet[2]== country)
+    df <- data %>% filter(data[2]== country)
     df <- df[5:numOfCol]
     df<- t(df)
   }
@@ -96,22 +103,32 @@ returnSumDeathsOfCountry <- function(country){
 }
 
 returnSumActiveCasesOfCountry <- function(country){
-  c <- as.numeric(returnSumCasesOfCountry(createTimeSeiresForCountry(country)))
+  c <- as.numeric(returnSumCasesOfCountry(createTimeSeiresForCountry(country, "cases")))
   r <- as.numeric(returnSumRecoveredOfCountry(country))
   d <- as.numeric(returnSumDeathsOfCountry(country))
   a <- c - (r + d)
   return(a)
 }
 
+
 # 4. Interactive plots:
-interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast){
-  if(plotType == "bar"){
-    return(dailyForecastPlot(countrySelected,ema,daysToForecast))
+interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData){
+  if(switchData == "cases"){
+    if(plotType == "bar"){
+      return(dailyForecastPlotCases(countrySelected,ema,daysToForecast))
+    }
+    else if(plotType == "line"){
+      return(cummulativePlotCases(countrySelected,daysToForecast))
+    }
   }
-  else if(plotType == "line"){
-    return(cummulativePlot(countrySelected,daysToForecast))
+  else if(switchData == "deaths"){
+    if(plotType == "bar"){
+      return(dailyForecastPlotDeaths(countrySelected,ema,daysToForecast))
+    }
+    else if(plotType == "line"){
+      return(cummulativePlotDeaths(countrySelected,daysToForecast))
+    }
   }
-  
 } 
 
 accurcyOfForecast <- function(countrySelected,daysToForecast){
@@ -121,7 +138,7 @@ accurcyOfForecast <- function(countrySelected,daysToForecast){
 }
 
 #### CASES ####
-dailyForecastPlot <- function(countrySelected, ema, daysToForecast){
+dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast){
   # Forecast data
   forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
   # Exponential Moving Average
@@ -140,7 +157,7 @@ dailyForecastPlot <- function(countrySelected, ema, daysToForecast){
   return(plot)
 }
 
-cummulativePlot <- function(countrySelected,daysToForecast){
+cummulativePlotCases <- function(countrySelected,daysToForecast){
   # Forecast data
   forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
   # Change forecast to cumulative
@@ -158,3 +175,43 @@ cummulativePlot <- function(countrySelected,daysToForecast){
   
   return(plot)
 }
+
+#### DEATHS ####
+dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast){
+  # Forecast data
+  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  # Exponential Moving Average
+  countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
+  # Plot the data
+  plot <-countrySelected %>% hchart("line", 
+    hcaes(x = formatedDate , y = daily), name = "Observed") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
+    hc_xAxis(title = list(text = "Dates")) %>% 
+    hc_yAxis(title = list(text = "Deaths"))
+  # Check if to apply 
+  if(isTRUE(ema)){
+    plot <- plot %>% hc_add_series(countrySelected, "line", hcaes(formatedDate, EMA), name = "Exponential Moving Average")
+  }
+  
+  return(plot)
+}
+
+cummulativePlotDeaths <- function(countrySelected,daysToForecast){
+  # Forecast data
+  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  # Change forecast to cumulative
+  lastDataPoint <- countrySelected$df[nrow(countrySelected)]
+  forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
+  for(i in 2: nrow(forecastData)){
+    forecastData$forcast[i] <- forecastData$forcast[i] + forecastData$forcast[i -1]
+  }
+  
+  plot <-countrySelected %>% hchart("line", 
+    hcaes(x = formatedDate , y = df), name = "Observed") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
+    hc_xAxis(title = list(text = "Dates")) %>% 
+    hc_yAxis(title = list(text = "Deaths"))
+  
+  return(plot)
+}
+

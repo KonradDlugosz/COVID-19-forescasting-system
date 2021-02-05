@@ -114,7 +114,6 @@ weeklyActiveCases <- function(){
   return(activeWeekly)
 }
 
-
 ### Other function ### 
 formatLargeNumber <- function(number){
   

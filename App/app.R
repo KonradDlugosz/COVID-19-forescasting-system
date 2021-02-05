@@ -123,6 +123,8 @@ ui <- dashboardPage(
                                                  choices = c(`<i class="fas fa-head-side-mask"></i>` = "cases",`<i class="fas fa-skull-crossbones"></i>`= "deaths"),
                                                  justified = TRUE
                                                ),
+                                               tags$script("$(\"input:radio[name='switchData'][value='cases']\").parent().css('color', '#ff5050');"),
+                                               tags$script("$(\"input:radio[name='switchData'][value='deaths']\").parent().css('color', '#ff9933');"),
                                                column(8 ,h3("Exponential Moving Average: ")),
                                                column(4 ,br(),switchInput(inputId = "movingAverage", value = FALSE)),
                                                knobInput(
@@ -282,7 +284,7 @@ server <- function(input, output, session) {
   })
   # Display country situation
   output$casesInCountry <- renderText({
-    formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country)))
+    formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")))
   })
   output$recoveredInCountry <- renderText({
     formatLargeNumber(returnSumRecoveredOfCountry(input$country))
@@ -297,14 +299,14 @@ server <- function(input, output, session) {
   
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
-    interactivePlotsMechanism(createTimeSeiresForCountry(input$country),input$switchGraphType, input$movingAverage,input$daysToForecast)
+    interactivePlotsMechanism(createTimeSeiresForCountry(input$country, input$switchData),input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData)
   })
   
   # Controls for plots
   output$value1 <- renderPrint({ input$switchGraphType })
   output$value2 <- renderPrint({ input$switchData })
   
-  output$MFE <- renderText({ paste("Root Mean Squared Error (RMSE):",accurcyOfForecast(createTimeSeiresForCountry(input$country),input$daysToForecast)) })
+  output$MFE <- renderText({ paste("Root Mean Squared Error (RMSE):",accurcyOfForecast(createTimeSeiresForCountry(input$country,input$switchData),input$daysToForecast)) })
   
   # Plots Ends -----------------------------------------------------------------
   # Forecasting start ----------------------------------------------------------
