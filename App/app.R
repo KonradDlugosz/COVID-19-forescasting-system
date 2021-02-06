@@ -43,37 +43,40 @@ ui <- dashboardPage(
                 fluidRow(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
-                             box(solidHeader = TRUE, width = 4,
-                                 column(1, algin = "left", dropdown(style = "jelly", icon = icon("virus"), width = "800px", color = "primary",
-                                                    column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days"), h3(id ="info-label","7-days change")),
-                                                    column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly()))), h3(paste(weeklyCasesChange(), "%"))),
-                                                    column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
-                                                    column(2,h3("Deaths"), h3(id = "info_text",formatLargeNumber(todayDeaths())),h3(id = "info_text",formatLargeNumber(sum(newDeathsWeekly())))),
-                                                    column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases()))),
-                                                    column(12, p(id ="info-label", "Please note this infomration may be incomplete and not 100% accuarate"))
-                                                    
-                                                    )),
+                             box(solidHeader = TRUE, width = 3,
+                                 column(1, algin = "left", 
+                                        dropdown(style = "jelly", icon = icon("virus"), width = "800px", color = "primary",
+                                                 column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days"), h3(id ="info-label","7-days change")),
+                                                 column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly()))), h3(paste(weeklyCasesChange(), "%"))),
+                                                 column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
+                                                 column(2,h3("Deaths"), h3(id = "info_text",formatLargeNumber(todayDeaths())),h3(id = "info_text",formatLargeNumber(sum(newDeathsWeekly())))),
+                                                 column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases()))),
+                                                 column(12, p(id ="info-label", "Please note this infomration may be incomplete and not 100% accuarate")))),
+                                 
                                  column(11, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
                                  actionButton("btn_totalCases", "", icon = icon("head-side-mask")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(casesDataSet), "%")))),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(casesDataSet), "%")))
+                                 ),
                                  
-                             box(solidHeader = TRUE, width = 4, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
+                             box(solidHeader = TRUE, width = 3, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
                                  actionButton("btn_totalRecovered", "", icon = icon("band-aid")),
                                  h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(deathsDataSet), "%"))),
                              
-                             box(solidHeader = TRUE, width = 4, h1(totalDeaths()), h3("TOTAL DEATHS"),
+                             box(solidHeader = TRUE, width = 3, h1(totalDeaths()), h3("TOTAL DEATHS"),
                                  actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones")),
                                  h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(recoveredDataSet), "%"))),
                              
+                             box(solidHeader = TRUE, width = 3, h1(formatLargeNumber(totalActiveCases())), h3("GLOBAL ACTIVE"),
+                                 actionButton("btn_totalActive", "", icon = icon("globe-europe")),
+                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(recoveredDataSet), "%"))),
+                             
                              br(),
-                             tabBox( width = 10,
-                                   id = "mainTabPanels",
-                                   tabPanel("Map", highchartOutput("dashMap")),
-                                   tabPanel("Chart", highchartOutput("mainTimeSeriesPlot")),
-                                   tabPanel("Pie", highchartOutput("casesHighChart"))
-                                   ),
-                             box(solidHeader = TRUE, width = 2, title = "Quick access",
+                             box(solidHeader = TRUE, width = 8, shinycssloaders::withSpinner(highchartOutput("dashMap"))),
+                             box(solidHeader = TRUE, width = 4, shinycssloaders::withSpinner(highchartOutput("casesHighChart"))),
+                             box(solidHeader = TRUE, width = 10,title = "Global Daily Situation Plot", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot"))),
+                             box(solidHeader = TRUE, width = 2,
                                  actionButton("btn_plots", "", icon = icon("chart-line")),
+                                 h4("Country plots"),
                                  actionButton("btn_forecast", "", icon = icon("laptop-code")),
                                  actionButton("btn_about", "",icon = icon("info"))),
                              )),
@@ -233,7 +236,7 @@ server <- function(input, output, session) {
     output$dashMap <- renderHighchart({
       hcmapSelector("cases")
     })
-    #casesMap("mymap")
+    
   })
   
   observeEvent(input$btn_totalRecovered, {
@@ -245,7 +248,6 @@ server <- function(input, output, session) {
       pieControler("recovered")
     })
     
-    #recoveredMap("mymap")
     output$dashMap <- renderHighchart({
       hcmapSelector("recovered")
     })
@@ -260,12 +262,19 @@ server <- function(input, output, session) {
       pieControler("death")
     })
     
-    #deathsMap("mymap")
     output$dashMap <- renderHighchart({
       hcmapSelector("deaths")
     })
   })
   
+  observeEvent(input$btn_totalActive, {
+    output$dashMap <- renderHighchart({
+      hcmapSelector("active")
+    })
+    output$casesHighChart <- renderHighchart({
+      pieControler("active")
+    })
+  })
   # Quick access buttons 
   observeEvent(input$btn_plots, {
     updateTabItems(session, "sideBarMenu", "plots")
@@ -293,7 +302,7 @@ server <- function(input, output, session) {
     formatLargeNumber(returnSumDeathsOfCountry(input$country))
   })
   output$activeInCountry <- renderText({
-    formatLargeNumber(returnSumActiveCasesOfCountry(input$country))
+    formatLargeNumber(returnActiveCases(input$country))
     
   })
   
@@ -301,11 +310,10 @@ server <- function(input, output, session) {
   output$selectedCountryPlotDaily <- renderHighchart({
     interactivePlotsMechanism(createTimeSeiresForCountry(input$country, input$switchData),input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData)
   })
-  
   # Controls for plots
   output$value1 <- renderPrint({ input$switchGraphType })
   output$value2 <- renderPrint({ input$switchData })
-  
+  # Accuracy for forecast
   output$MFE <- renderText({ paste("Root Mean Squared Error (RMSE):",accurcyOfForecast(createTimeSeiresForCountry(input$country,input$switchData),input$daysToForecast)) })
   
   # Plots Ends -----------------------------------------------------------------

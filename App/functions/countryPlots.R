@@ -102,12 +102,32 @@ returnSumDeathsOfCountry <- function(country){
   }
 }
 
+# Not used -------------------------------------------!!!!
 returnSumActiveCasesOfCountry <- function(country){
   c <- as.numeric(returnSumCasesOfCountry(createTimeSeiresForCountry(country, "cases")))
   r <- as.numeric(returnSumRecoveredOfCountry(country))
   d <- as.numeric(returnSumDeathsOfCountry(country))
   a <- c - (r + d)
   return(a)
+
+}
+
+returnActiveCases <- function(country){
+  firstDay <- ncol(casesDataSet) - 13
+  lastDay <- ncol(casesDataSet)
+  # Combine country into one value if appear more then once
+  if(country %in% duplicatedCountries$Var1){
+    df <- casesDataSet %>% filter(casesDataSet[2] == country)
+    fourTeenDaysCases <- sum(df[lastDay]) - sum(df[firstDay])
+    return(fourTeenDaysCases)
+  }
+  # Return country if appears once
+  else if(!country %in% duplicatedCountries$Var1){
+    df <- casesDataSet %>% 
+      filter(casesDataSet[2] == country)
+    fourTeenDaysCases <- df[lastDay] - df[firstDay]
+    return(fourTeenDaysCases)
+  }
 }
 
 

@@ -7,6 +7,27 @@ casesDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-
 deathsDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
 recoveredDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
 
+activeCases <- function(){
+  firstDay <- ncol(casesDataSet) - 13
+  lastDay <- ncol(casesDataSet)
+  active <- casesDataSet[lastDay] -casesDataSet[firstDay]
+  df <- data.frame(casesDataSet[1],casesDataSet[2], active)
+  names(df)[1] <- "Province/State"
+  names(df)[2] <- "Country/Region"
+  names(df)[3] <- "Active"
+  return(df)
+}
+totalActiveCases <- function(){
+  df <- activeCases()
+  return(sum(df$Active))
+}
+
+pieActiveCasesData <- function(){
+  df <- activeCases()
+  df <- df %>% group_by(`Country/Region`) %>% 
+    summarise(n = sum(Active))
+  return(df)
+}
 #### Global cases ####
 todayCases <- function() {
   data <- casesDataSet

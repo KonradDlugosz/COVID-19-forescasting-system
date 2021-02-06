@@ -5,7 +5,7 @@ library(highcharter)
 
 # Get country codes
 countryCodes <-read_csv("https://gist.githubusercontent.com/radcliff/f09c0f88344a7fcef373/raw/2753c482ad091c54b1822288ad2e4811c021d8ec/wikipedia-iso-country-codes.csv")
-
+hcmapSelector("active")
 hcmapSelector <- function(data){
   if(data == "cases"){
     return(hcmapGenerator(casesDataSet, "Cases"))
@@ -15,6 +15,9 @@ hcmapSelector <- function(data){
   }
   else if(data == "recovered"){
     return(hcmapGenerator(recoveredDataSet, "Recovered"))
+  }
+  else if (data == "active"){
+    return(hcmapGenerator(activeCases(), "Active"))
   }
 }
 
@@ -28,7 +31,7 @@ hcmapGenerator <- function(df, name){
     }
   }
   
-  if(name == "Cases" | name == "Deaths"){
+  if(name == "Cases" | name == "Deaths" | name == "Active"){
     # Manual correction NA country codes for CASES and DEATHS
     df$`Province/State`[250] <- "US"
     df$`Province/State`[28] <- "BO"
@@ -105,6 +108,12 @@ hcmapGenerator <- function(df, name){
     map <- map %>%
       hc_colorAxis(
         stops = color_stops(colors = c("#80ccff", "#007acc"))
+      ) 
+  }
+  else if (name == "Active"){
+    map <- map %>%
+      hc_colorAxis(
+        stops = color_stops(colors = c("#80ffcc", "#00b36b"))
       ) 
   }
 

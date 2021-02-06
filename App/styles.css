@@ -6,7 +6,7 @@ body {
 
 /*DASH*/
 /*Main buttons*/
-#btn_totalCases, #btn_totalRecovered, #btn_totalDeaths{
+#btn_totalCases, #btn_totalRecovered, #btn_totalDeaths, #btn_totalActive{
   width: 150px;
   height: 150px;
   font-size: 100px;
@@ -42,6 +42,16 @@ body {
 
 #btn_totalDeaths:hover{
   color: #cc0000;
+  background-color: #e6e6e6;
+}
+
+#btn_totalActive{
+  color: #00ff99;
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+#btn_totalActive:hover {
+  color: #00cc7a;
   background-color: #e6e6e6;
 }
 
@@ -142,7 +152,7 @@ body {
 }
 
 #recovered{
-  width: 100px;
+  width: 100px; 
   height: 100px;
   font-size: 60px;
 }

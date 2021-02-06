@@ -14,15 +14,24 @@ pieControler <- function(cases_death_recovered){
   else if(cases_death_recovered == "recovered"){
     return(piePlotGenerator(recoveredDataSet, "Recovered"))
   }
+  else if(cases_death_recovered == "active"){
+    return(piePlotGenerator(pieActiveCasesData(), "Active"))
+  }
 }
 
 piePlotGenerator <- function(dataFrame, dataName){
   # Set highcharter options
   options(highcharter.theme = hc_theme_smpl(tooltip = list(valueDecimals = 2)))
-  
   data <- dataFrame
-  df <- data.frame(data[ncol(data)], data[2])
-  names(df)[1] <- "Value"
+  
+  if(dataName == "Cases" | dataName == "Deaths" | dataName == "Recovered"){
+    df <- data.frame(data[ncol(data)], data[2])
+    names(df)[1] <- "Value"
+  }
+  else if(dataName == "Active"){
+    df <- data.frame(data[2], data[1])
+    names(df)[1] <- "Value"
+  }
   
   df_sorted <-df[order(df[1]),]
   
