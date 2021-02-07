@@ -63,11 +63,13 @@ newCasesWeekly <- function(){
 dailyChange <- function(dataFrame){
   data <- dataFrame
   newDate <- ncol(data)
-  oldDate <- newDate - 1
+  oldDate <- newDate - 2
   twoDaysAllCounties <- data[oldDate:newDate]
   twoDaysData <- colSums(twoDaysAllCounties)
-  change <- twoDaysData[2] - twoDaysData[1]
-  percentage <- change / twoDaysData[1] * 100
+  newDay <- twoDaysData[3]- twoDaysData[2]
+  oldDay <- twoDaysData[2]- twoDaysData[1]
+  change <- newDay - oldDay
+  percentage <- change / oldDay * 100
   percentage <- format(round(percentage, 2), nsmall = 2)
   return(toString(percentage))
 }
@@ -77,26 +79,36 @@ dailyChangeActiveCases <- function(){
   old <- sum(activeCases(14)[3])
   new <- sum(activeCases(13)[3])
   change <- new - old
-  percentage <- change / new * 100
+  percentage <- change / old * 100
   percentage <- format(round(percentage, 2), nsmall = 2)
   return(percentage)
 }
 
-changeIcon <- function(df){
-  if(df < 0){
-    icon <- "sort-down"
+changeIcon <- function(df, recovered){
+  if(recovered == TRUE){
+    if(df > 0){
+      icon <- "sort-down"
+    }
+    else if(df < 0){
+      icon <- "sort-up"
+    }
   }
-  else if(df > 0){
-    icon <- "sort-up"
+  else if(recovered == FALSE){
+    if(df < 0){
+      icon <- "sort-down"
+    }
+    else if(df > 0){
+      icon <- "sort-up"
+    }
   }
   return(icon)
 }
 
-changeIconID <- function(df){
-  if(changeIcon(df) == "sort-down" ){
+changeIconID <- function(df,bool){
+  if(changeIcon(df,bool) == "sort-down" ){
     id <- "sort_downIcon"
   }
-  else if(changeIcon(df) =="sort-up"){
+  else if(changeIcon(df,bool) =="sort-up"){
     id <- "sort_upIcon"
   }
   return(id)

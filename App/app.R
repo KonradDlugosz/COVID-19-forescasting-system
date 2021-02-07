@@ -57,20 +57,20 @@ ui <- dashboardPage(
                                  
                                  column(11, h1(formatLargeNumber(totalCases())), h3("TOTAL CASES"), 
                                  actionButton("btn_totalCases", "", icon = icon("head-side-mask")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(casesDataSet), "%"), actionButton(changeIconID(dailyChange(casesDataSet)),"",icon = icon(changeIcon(dailyChange(casesDataSet))))))
+                                 h3(id = "increase",sprintf("Daily change: %s%s", dailyChange(casesDataSet), "%"), actionButton(changeIconID(dailyChange(casesDataSet),FALSE),"",icon = icon(changeIcon(dailyChange(casesDataSet), FALSE)))))
                                  ),
                                  
                              box(solidHeader = TRUE, width = 3, h1(totalRecovered()), h3("TOTAL RECOVERED"), 
                                  actionButton("btn_totalRecovered", "", icon = icon("band-aid")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(deathsDataSet), "%"), actionButton(changeIconID(dailyChange(deathsDataSet)),"",icon = icon(changeIcon(dailyChange(deathsDataSet)))))),
+                                 h3(id = "increase",sprintf("Daily change: %s%s", dailyChange(recoveredDataSet), "%"), actionButton(changeIconID(dailyChange(recoveredDataSet),TRUE),"",icon = icon(changeIcon(dailyChange(recoveredDataSet), TRUE))))),
                              
                              box(solidHeader = TRUE, width = 3, h1(totalDeaths()), h3("TOTAL DEATHS"),
                                  actionButton("btn_totalDeaths", "", icon = icon("skull-crossbones")),
-                                 h3(id = "increase",sprintf("Daily increase: %s%s", dailyChange(recoveredDataSet), "%"), actionButton(changeIconID(dailyChange(recoveredDataSet)),"",icon = icon(changeIcon(dailyChange(recoveredDataSet)))))),
+                                 h3(id = "increase",sprintf("Daily change: %s%s", dailyChange(deathsDataSet), "%"), actionButton(changeIconID(dailyChange(deathsDataSet),FALSE),"",icon = icon(changeIcon(dailyChange(deathsDataSet), FALSE))))),
                           
                              box(solidHeader = TRUE, width = 3, h1(formatLargeNumber(totalActiveCases())), h3("GLOBAL ACTIVE"),
                                  actionButton("btn_totalActive", "", icon = icon("globe-europe")),
-                                 h3(id = "increase" ,sprintf("Daily change: %s%s", dailyChangeActiveCases(), "%"), actionButton(changeIconID(dailyChangeActiveCases()),"",icon = icon(changeIcon(dailyChangeActiveCases()))))
+                                 h3(id = "increase" ,sprintf("Daily change: %s%s", dailyChangeActiveCases(), "%"), actionButton(changeIconID(dailyChangeActiveCases(),FALSE),"",icon = icon(changeIcon(dailyChangeActiveCases(), FALSE))))
                                  ),
                              br(),
                              box(solidHeader = TRUE, width = 8, shinycssloaders::withSpinner(highchartOutput("dashMap"))),
