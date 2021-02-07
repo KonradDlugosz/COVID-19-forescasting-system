@@ -22,12 +22,6 @@ totalActiveCases <- function(){
   return(sum(df$Active))
 }
 
-pieActiveCasesData <- function(){
-  df <- activeCases()
-  df <- df %>% group_by(`Country/Region`) %>% 
-    summarise(n = sum(Active))
-  return(df)
-}
 #### Global cases ####
 todayCases <- function() {
   data <- casesDataSet

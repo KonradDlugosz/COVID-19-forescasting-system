@@ -5,7 +5,7 @@ library(highcharter)
 
 # Get country codes
 countryCodes <-read_csv("https://gist.githubusercontent.com/radcliff/f09c0f88344a7fcef373/raw/2753c482ad091c54b1822288ad2e4811c021d8ec/wikipedia-iso-country-codes.csv")
-hcmapSelector("active")
+
 hcmapSelector <- function(data){
   if(data == "cases"){
     return(hcmapGenerator(casesDataSet, "Cases"))
