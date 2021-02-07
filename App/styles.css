@@ -84,6 +84,20 @@ body {
   color:#00e6ac;
 }
 
+#sort_downIcon {
+  color: #00ff00;
+  background-color: #ffffff;
+  border-color: #ffffff;
+  font-size: 30px;
+}
+
+#sort_upIcon {
+  color: #ff0000;
+  background-color: #ffffff;
+  border-color: #ffffff;
+  font-size: 30px;
+}
+
 
 /*PLOTS PAGE*/
 #sidebarControls {

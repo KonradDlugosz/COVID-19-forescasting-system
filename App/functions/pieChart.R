@@ -40,7 +40,7 @@ pieDeathsData <- function(){
 
 # Active Data
 pieActiveCasesData <- function(){
-  df <- activeCases()
+  df <- activeCases(13)
   df <- df %>% group_by(`Country/Region`) %>% 
     summarise(n = sum(Active))
   return(df)

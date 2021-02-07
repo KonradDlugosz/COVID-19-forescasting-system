@@ -7,9 +7,9 @@ casesDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-
 deathsDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
 recoveredDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
 
-activeCases <- function(){
-  firstDay <- ncol(casesDataSet) - 13
-  lastDay <- ncol(casesDataSet)
+activeCases <- function(n){
+  firstDay <- ncol(casesDataSet) - n
+  lastDay <- firstDay + 13
   active <- casesDataSet[lastDay] -casesDataSet[firstDay]
   df <- data.frame(casesDataSet[1],casesDataSet[2], active)
   names(df)[1] <- "Province/State"
@@ -18,7 +18,7 @@ activeCases <- function(){
   return(df)
 }
 totalActiveCases <- function(){
-  df <- activeCases()
+  df <- activeCases(13)
   return(sum(df$Active))
 }
 
@@ -45,9 +45,39 @@ dailyChange <- function(dataFrame){
   twoDaysAllCounties <- data[oldDate:newDate]
   twoDaysData <- colSums(twoDaysAllCounties)
   change <- twoDaysData[2] - twoDaysData[1]
-  procentage <- change / twoDaysData[1] * 100
-  procentage <- format(round(procentage, 2), nsmall = 2)
-  return(toString(procentage))
+  percentage <- change / twoDaysData[1] * 100
+  percentage <- format(round(percentage, 2), nsmall = 2)
+  return(toString(percentage))
+}
+
+
+dailyChangeActiveCases <- function(){
+  old <- sum(activeCases(14)[3])
+  new <- sum(activeCases(13)[3])
+  change <- new - old
+  percentage <- change / new * 100
+  percentage <- format(round(percentage, 2), nsmall = 2)
+  return(percentage)
+}
+
+changeIcon <- function(df){
+  if(df < 0){
+    icon <- "sort-down"
+  }
+  else if(df > 0){
+    icon <- "sort-up"
+  }
+  return(icon)
+}
+
+changeIconID <- function(df){
+  if(changeIcon(df) == "sort-down" ){
+    id <- "sort_downIcon"
+  }
+  else if(changeIcon(df) =="sort-up"){
+    id <- "sort_upIcon"
+  }
+  return(id)
 }
 
 # Total cases 

@@ -17,7 +17,7 @@ hcmapSelector <- function(data){
     return(hcmapGenerator(recoveredDataSet, "Recovered"))
   }
   else if (data == "active"){
-    return(hcmapGenerator(activeCases(), "Active"))
+    return(hcmapGenerator(activeCases(13), "Active"))
   }
 }
 
