@@ -113,3 +113,15 @@ dailyDeathsPlot <- function(){
   
   return(plot)
 }
+
+dailyActivePlot <- function() {
+  # Load active cases data
+  df <- activeCasesTimeSeries()
+
+  plot <- df %>% hchart("line", 
+    hcaes(x = date  , y = active), name = "Active cases") %>% 
+    hc_xAxis(title = list(text = "Dates")) %>% 
+    hc_yAxis(title = list(text = "Deaths"))
+  
+  return(plot)
+}

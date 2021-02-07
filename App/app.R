@@ -1,6 +1,7 @@
 #install.packages("leaflet")
 #install.packages("leaflet.extras")
 #install.packages("shinyjs")
+#install.packages("shinyalert")
 #shinycssloaders
 ## app.R ##
 library(shinydashboard)
@@ -9,6 +10,7 @@ library(ggplot2)
 library(shinyWidgets)
 library(shinyjs)
 library(shinycssloaders)
+library(shinyalert)
 
 ### Sources ####
 source("data/covid19Data.R")
@@ -77,8 +79,9 @@ ui <- dashboardPage(
                              box(solidHeader = TRUE, width = 2,
                                  actionButton("btn_plots", "", icon = icon("chart-line")),
                                  h4("Country plots"),
-                                 actionButton("btn_forecast", "", icon = icon("laptop-code")),
-                                 actionButton("btn_about", "",icon = icon("info"))),
+                                 actionButton("btn_virus", "", icon = icon("virus")),
+                                 h4("Situation")
+                             )
                              )),
                          )
               )
@@ -274,16 +277,21 @@ server <- function(input, output, session) {
     output$casesHighChart <- renderHighchart({
       pieControler("active")
     })
+    output$mainTimeSeriesPlot <- renderHighchart({
+      dailyActivePlot()
+    }) 
   })
   # Quick access buttons 
   observeEvent(input$btn_plots, {
     updateTabItems(session, "sideBarMenu", "plots")
   })
-  observeEvent(input$btn_forecast, {
-    updateTabItems(session, "sideBarMenu", "forecasting")
-  })
-  observeEvent(input$btn_about, {
-    updateTabItems(session, "sideBarMenu", "about")
+  observeEvent(input$btn_virus, {
+    # Show a modal when the button is pressed
+    shinyalert(
+      "Enter your name", type = "input",
+      callbackR = function(x) { message("Hello ", x) },
+      callbackJS = "function(x) { alert('Hello ' + x); }"
+    )
   })
   
   # Dash Ends ------------------------------------------------------------------

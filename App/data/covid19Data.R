@@ -22,6 +22,28 @@ totalActiveCases <- function(){
   return(sum(df$Active))
 }
 
+activeCasesTimeSeries <- function(){
+  # Process data
+  firstDay <- ncol(casesDataSet) - 14
+  lastDay <- ncol(casesDataSet)
+  active <- colSums(casesDataSet[firstDay:lastDay])
+  dailyActive <- c()
+  time <- Sys.Date()
+  # Get daily cases
+  for(i in 2:length(active)){
+    dailyActive[i - 1] <- active[i] - active[i - 1]
+  }
+  # Get dates
+  for(i in length(dailyActive):1){
+    time[i] <- Sys.Date() - i
+  }
+  # Create dataframe and name columns
+  ts <- data.frame(sort(time), dailyActive)
+  names(ts)[1] <- "date"
+  names(ts)[2] <- "active"
+  return(ts)
+  
+}
 #### Global cases ####
 todayCases <- function() {
   data <- casesDataSet
