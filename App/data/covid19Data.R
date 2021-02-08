@@ -84,32 +84,33 @@ dailyChangeActiveCases <- function(){
   return(percentage)
 }
 
-changeIcon <- function(df, recovered){
-  if(recovered == TRUE){
-    if(df > 0){
-      icon <- "sort-down"
-    }
-    else if(df < 0){
-      icon <- "sort-up"
-    }
+changeIcon <- function(df){
+  if(df < 0){
+    icon <- "sort-down"
   }
-  else if(recovered == FALSE){
-    if(df < 0){
-      icon <- "sort-down"
-    }
-    else if(df > 0){
-      icon <- "sort-up"
-    }
+  else if(df > 0){
+    icon <- "sort-up"
   }
+  
   return(icon)
 }
 
 changeIconID <- function(df,bool){
-  if(changeIcon(df,bool) == "sort-down" ){
-    id <- "sort_downIcon"
+  if(bool == TRUE ){
+    if(changeIcon(df) == "sort-down" ){
+      id <- "sort_upIcon"
+    }
+    else if(changeIcon(df) =="sort-up"){
+      id <- "sort_downIcon"
+    }
   }
-  else if(changeIcon(df,bool) =="sort-up"){
-    id <- "sort_upIcon"
+  else if(bool == FALSE){
+    if(changeIcon(df) == "sort-down" ){
+      id <- "sort_downIcon"
+    }
+    else if(changeIcon(df) =="sort-up"){
+      id <- "sort_upIcon"
+    }
   }
   return(id)
 }
