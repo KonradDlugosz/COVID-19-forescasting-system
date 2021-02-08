@@ -1,6 +1,7 @@
 #This file creates contry based plots and forecasting
 #### Sources ####
 source("data/covid19Data.R")
+source("data/population.R")
 source("functions/forecasting.R")
 library(ggplot2)
 library(TTR)
@@ -130,6 +131,10 @@ returnActiveCases <- function(country){
   }
 }
 
+returnPopulationOfSelctedCountry <- function(countryName){
+  popOfCountry <- pop %>% filter(country == countryName )
+  return(popOfCountry$population)
+}
 
 # 4. Interactive plots:
 interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData){
