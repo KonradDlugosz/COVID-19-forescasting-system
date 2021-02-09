@@ -14,7 +14,7 @@ Furthermore, these models are used on train data which will try to predict futur
 This might me very helpful in predicting an outbreak of particular country.
 
 ## Forecast
-![](App/Images/forecast.PNG)
+![](App/Images/forecast.png)
 > The forecast is using forward-feed neural network algorithm.
 
 The accuracy is measured using root mean square error which shows on average, how many values the forecast was away from actual.
