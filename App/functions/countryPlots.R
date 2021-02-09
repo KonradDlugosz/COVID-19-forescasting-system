@@ -1,4 +1,4 @@
-#This file creates contry based plots and forecasting
+### This file creates contry based plots and forecasting
 #### Sources ####
 source("data/covid19Data.R")
 source("data/population.R")
@@ -52,13 +52,6 @@ createTimeSeiresForCountry <- function(country, dataSelector){
   return(d)
 }
 
-# incubation period Active cases
-#t <- createTimeSeiresForCountry("Poland")
-#n <- nrow(t)
-#n14 <- nrow(t) - 14
-#sum(t$daily[n:n14])
-
-
 # 3. Return functions
 retrunListOfCountries <- function(){
   return(countries)
@@ -68,6 +61,14 @@ returnSumCasesOfCountry <- function(df){
   dF <- df
   total<-dF$df[nrow(dF)]
   return(total)
+}
+
+returnPercentageOfPopulation <- function(casesNum,countryName){
+  popOfCountry <- pop %>% filter(country == countryName)
+  decimal <- casesNum/popOfCountry$population
+  percentage <- decimal * 100
+  percentage <- format(round(percentage, 2), nsmall = 2)
+  return(percentage)
 }
 
 returnSumRecoveredOfCountry <- function(country){
@@ -103,16 +104,6 @@ returnSumDeathsOfCountry <- function(country){
   }
 }
 
-# Not used -------------------------------------------!!!!
-returnSumActiveCasesOfCountry <- function(country){
-  c <- as.numeric(returnSumCasesOfCountry(createTimeSeiresForCountry(country, "cases")))
-  r <- as.numeric(returnSumRecoveredOfCountry(country))
-  d <- as.numeric(returnSumDeathsOfCountry(country))
-  a <- c - (r + d)
-  return(a)
-
-}
-
 returnActiveCases <- function(country){
   firstDay <- ncol(casesDataSet) - 13
   lastDay <- ncol(casesDataSet)
@@ -128,6 +119,21 @@ returnActiveCases <- function(country){
       filter(casesDataSet[2] == country)
     fourTeenDaysCases <- df[lastDay] - df[firstDay]
     return(fourTeenDaysCases)
+  }
+}
+
+returnTitleOfCountryPlots <- function(switchGraphType, switchData){
+  if(switchGraphType == "bar" & switchData == "cases"){
+    return("Daily cases with forecast")
+  }
+  else if(switchGraphType == "bar" & switchData == "deaths"){
+    return("Daily deaths with forecast")
+  }
+  else if(switchGraphType == "line" & switchData == "cases"){
+    return("Cumulative cases with forecast")
+  }
+  else if(switchGraphType == "line" & switchData == "deaths"){
+    return("Cumulative deaths with forecast")
   }
 }
 

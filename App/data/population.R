@@ -14,7 +14,7 @@ for(i in 1:nrow(iso_look_up)){
   }
 }
 
-# Make final dataframe of all coutries
+# Make final dataframe of all coutries 
 pop <- data.frame(country,population)
 pop <- na.omit(pop)
 rownames(pop) <- NULL

@@ -104,25 +104,25 @@ ui <- dashboardPage(
                 fluidRow(
                   column(12, align="center",
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
-                             box(width = 8, solidHeader = TRUE, height = "auto",
-                                column(2, align="left", actionBttn(inputId = "backDash", label = NULL, style = "material-circle",  color = "primary",icon = icon("arrow-left")),),
-                                column(10, 
-                                       column(3, h2("Cases"), h3(id = "info_text",textOutput("casesInCountry"))),
-                                       column(3, h2("Recovered"), h3(id = "info_text",textOutput("recoveredInCountry"))),
-                                       column(3 ,h2("Deaths"), h3(id = "info_text",textOutput("deathsInCountry"))),
-                                       column(3, h2("Active"), h3(id= "activecases_text",textOutput("activeInCountry")))
-                                       )
+                             box(width = 4,  solidHeader = TRUE, align = "center", height = "160px",
+                                 column(2, align="left", actionBttn(inputId = "backDash", label = NULL, style = "material-circle",  color = "primary",icon = icon("arrow-left"))),
+                                 column(10,h2(textOutput("selectedCountryDisplay")),
+                                        h3(textOutput("population")))),
+                             box(width = 8, solidHeader = TRUE, height = "160px",
+                                 column(3, h2("Cases"), h3(id = "info_text",textOutput("casesInCountry"))),
+                                 column(3, h2("Recovered"), h3(id = "info_text",textOutput("recoveredInCountry"))),
+                                 column(3 ,h2("Deaths"), h3(id = "info_text",textOutput("deathsInCountry"))),
+                                 column(3, h2("Active"), h3(id= "activecases_text",textOutput("activeInCountry")))
                                  ),
-                             box(width = 4,  solidHeader = TRUE, align = "center", h1(textOutput("selectedCountryDisplay")),
-                                 h2(textOutput("population"))),
                              box(width = 12, solidHeader = TRUE, height = "auto",
                                  mainPanel(
+                                   h3(textOutput("countryPlotTitle")),
                                    shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily")),
                                    column(7, align = "right", h4(textOutput("MFE"))),
                                    column(5, align = "left",dropdown(style = "jelly", icon = icon("question"), color = "primary",
                                                       p(id ="info-label","This value shows on average, how many values the forecasat was away from actual.")))
                                    ),
-                                 sidebarPanel( align = "left", id = "sidebarControls",
+                                 sidebarPanel( align = "center", id = "sidebarControls",
                                                selectInput("country", 
                                                            choices = retrunListOfCountries(), 
                                                            label = "Select country: "),
@@ -130,22 +130,22 @@ ui <- dashboardPage(
                                                  inputId = "switchGraphType",
                                                  label = "Choose graph :", 
                                                  choices = c(`<i class='fa fa-bar-chart'></i>` = "bar", `<i class='fa fa-line-chart'></i>` = "line"),
-                                                 justified = TRUE
+                                                 justified = TRUE,
+                                                 size = "lg"
                                                ),
                                                radioGroupButtons(
                                                  inputId = "switchData",
                                                  label = "Choose data :", 
                                                  choices = c(`<i class="fas fa-head-side-mask"></i>` = "cases",`<i class="fas fa-skull-crossbones"></i>`= "deaths"),
-                                                 justified = TRUE
+                                                 justified = TRUE,
+                                                 size = "lg"
                                                ),
-                                               tags$script("$(\"input:radio[name='switchData'][value='cases']\").parent().css('color', '#ff5050');"),
-                                               tags$script("$(\"input:radio[name='switchData'][value='deaths']\").parent().css('color', '#ff9933');"),
                                                column(8 ,h3("Exponential Moving Average: ")),
                                                column(4 ,br(),switchInput(inputId = "movingAverage", value = FALSE)),
                                                knobInput(
                                                  inputId = "daysToForecast",
                                                  label = "Days to forecast:",
-                                                 value = 7,
+                                                 value = 14,
                                                  min = 0,
                                                  max = 30,
                                                  displayPrevious = TRUE,
@@ -301,16 +301,20 @@ server <- function(input, output, session) {
   })
   # Display country situation
   output$casesInCountry <- renderText({
-    formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")))
+    paste(formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases"))), "(",
+          returnPercentageOfPopulation(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")),input$country), "%", ")" )
   })
   output$recoveredInCountry <- renderText({
-    formatLargeNumber(returnSumRecoveredOfCountry(input$country))
+    paste(formatLargeNumber(returnSumRecoveredOfCountry(input$country)), "(", 
+          returnPercentageOfPopulation(returnSumRecoveredOfCountry(input$country),input$country), "%", ")")
   })
   output$deathsInCountry <- renderText({
-    formatLargeNumber(returnSumDeathsOfCountry(input$country))
+    paste(formatLargeNumber(returnSumDeathsOfCountry(input$country)), "(",
+          returnPercentageOfPopulation(returnSumDeathsOfCountry(input$country),input$country), "%", ")")
   })
   output$activeInCountry <- renderText({
-    formatLargeNumber(returnActiveCases(input$country))
+    paste(formatLargeNumber(returnActiveCases(input$country)), "(",
+          returnPercentageOfPopulation(returnActiveCases(input$country),input$country), "%", ")" )
     
   })
   
@@ -327,13 +331,18 @@ server <- function(input, output, session) {
     paste("Root Mean Squared Error (RMSE):",accurcyOfForecast(createTimeSeiresForCountry(input$country,input$switchData),input$daysToForecast)) 
     })
   
-  # Display Country selcted
+  # Display Country selected
   output$selectedCountryDisplay <- renderText({
     input$country
   })
   # Display population of selected country
   output$population <- renderText({
-    formatLargeNumber(returnPopulationOfSelctedCountry(input$country))
+    paste("Population: ",formatLargeNumber(returnPopulationOfSelctedCountry(input$country)))
+  })
+  
+  # Display title for plot
+  output$countryPlotTitle <- renderText({
+    returnTitleOfCountryPlots(input$switchGraphType,input$switchData)
   })
   
   # Plots Ends -----------------------------------------------------------------
