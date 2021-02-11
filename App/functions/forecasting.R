@@ -3,7 +3,7 @@
 createNuralNetworkTSForecast <- function(countrySelected,daysToForecast){
   # Default days to forecast 
   if(missing(daysToForecast)){
-    daysToForecast = 7
+    daysToForecast = 14
   }
   # 1. Load and format data
   data <- countrySelected

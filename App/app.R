@@ -11,9 +11,11 @@ library(shinyWidgets)
 library(shinyjs)
 library(shinycssloaders)
 library(shinyalert)
+library(forecast)
 
 ### Sources ####
 source("data/covid19Data.R")
+source("data/dataDisplay.R")
 source("functions/dashPlots.R")
 source("functions/countryPlots.R")
 source("functions/forecasting.R")
@@ -22,7 +24,28 @@ source("functions/mapHighChart.R")
 
 ### Shiny app ###
 ui <- dashboardPage(
-  dashboardHeader(title = "COVID-19"),
+  dashboardHeader(title = "COVID-19",
+                  dropdownMenu(type = "notifications",
+                               notificationItem(
+                                 text = paste(formatLargeNumber(todayCases()), "new cases"),
+                                 icon("users")
+                               ),
+                               notificationItem(
+                                 text = paste(formatLargeNumber(todayRecovered()), "today recovered"),
+                                 icon("band-aid"),
+                                 status = "info"
+                               ),
+                               notificationItem(
+                                 text = paste(formatLargeNumber(todayDeaths()), "new deaths"),
+                                 icon = icon("skull-crossbones"),
+                                 status = "danger"
+                               ),
+                               notificationItem(
+                                 text = paste(formatLargeNumber(todayActiveCases()), "active cases"),
+                                 icon = icon("globe-europe"),
+                                 status = "warning"
+                               )
+                  )),
   dashboardSidebar( collapsed = TRUE,
     sidebarMenu( id = "sideBarMenu",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("virus")),
@@ -62,20 +85,21 @@ ui <- dashboardPage(
                                         actionButton("btn_totalActive", "", icon = icon("globe-europe")),
                                         h3(id = "increase" ,sprintf("Daily change: %s%s", dailyChangeActiveCases(), "%"), 
                                            actionButton(changeIconID(dailyChangeActiveCases(),FALSE),"",icon = icon(changeIcon(dailyChangeActiveCases()))))),
-                                 column(1, dropdown(style = "jelly", icon = icon("question"), color = "primary", right = TRUE, width = "600px",
+                                 column(1, dropdown(style = "jelly", icon = icon("question"), color = "primary", right = TRUE, width = "600px", align = "left",
                                                     h3("Total Cases"),
-                                                    p(id ="info-label","This shows total number of cases globaly obsereved."),
+                                                    h4(id ="info-label","Total number of cases globaly obsereved."),
                                                     h3("Total Recovered"),
-                                                    p(id ="info-label", "This shows total number of infected people that have recovered from COVID."),
+                                                    h4(id ="info-label", "Total number of infected people that have recovered from COVID-19."),
                                                     h3("Total Deaths"),
-                                                    p(id ="info-label", "This shows total number of deaths that occured due to COVID."),
+                                                    h4(id ="info-label", "Total number of deaths that occured due to COVID-19."),
                                                     h3("Active"),
-                                                    p(id ="info-label", "This number shows how many cases are still active since incubation period (~14 days)")))
+                                                    h4(id ="info-label", "Number of cases which are still active since incubation period (~14 days)"),
+                                                    p(id ="info-label", "Please note that this data might not be 100% accurate due to mistakes like system errors or human error.")))
                                  ),
                              br(),
                              box(solidHeader = TRUE, width = 8, shinycssloaders::withSpinner(highchartOutput("dashMap"))),
                              box(solidHeader = TRUE, width = 4, shinycssloaders::withSpinner(highchartOutput("casesHighChart"))),
-                             box(solidHeader = TRUE, width = 10,title = "Global Daily Situation Plot", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot"))),
+                             box(solidHeader = TRUE, width = 10,title = "Global daily situation with 14 days of forecast", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot"))),
                              box(solidHeader = TRUE, width = 2,
                                  dropdown(inputId ="btn_virus", style = "simple",icon = icon("virus"), width = "800px", color = "primary", right = TRUE,
                                           column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days"), h3(id ="info-label","7-days change")),
@@ -86,8 +110,10 @@ ui <- dashboardPage(
                                           column(12, p(id ="info-label", "Please note this infomration may be incomplete and not 100% accuarate"))),
                                  h4("Situation"),
                                  actionButton("btn_plots", "", icon = icon("chart-line")),
-                                 h4("Country plots"),
-                             )
+                                 h4("Country Forecast"),
+                             ),
+                             box(solidHeader = TRUE, width = 12,
+                                 dataTableOutput("dataDisplay"))
                              )),
                          )
               )
@@ -145,8 +171,8 @@ ui <- dashboardPage(
                   ))),
       #### Plots ENDS ----------------------------------------------------------###
       ### ABOUT PAGE STARTS ----------------------------------------------------###
-      tabItem(tabName = "about")
-      
+      tabItem(tabName = "about",
+              tableOutput("testData"))
       ### ABOUT PAGE ENDS ------------------------------------------------------###
     )
   )
@@ -230,6 +256,11 @@ server <- function(input, output, session) {
   observeEvent(input$btn_plots, {
     updateTabItems(session, "sideBarMenu", "plots")
   })
+  
+  # Data Display
+  output$dataDisplay <- renderDataTable({
+    df
+  })
 
   # Dash Ends ------------------------------------------------------------------
   # Plots Start ----------------------------------------------------------------
@@ -283,6 +314,10 @@ server <- function(input, output, session) {
   })
   
   # Plots Ends -----------------------------------------------------------------
+  
+  output$testData <- renderTable({
+    casesDataSet
+  })
   
 }
 
