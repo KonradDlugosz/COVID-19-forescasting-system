@@ -100,7 +100,7 @@ ui <- dashboardPage(
                              box(solidHeader = TRUE, width = 8, shinycssloaders::withSpinner(highchartOutput("dashMap"))),
                              box(solidHeader = TRUE, width = 4, shinycssloaders::withSpinner(highchartOutput("casesHighChart"))),
                              box(solidHeader = TRUE, width = 10,title = "Global daily situation with 14 days of forecast", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot"))),
-                             box(solidHeader = TRUE, width = 2,
+                             box(solidHeader = TRUE, width = 2, height = "450px",
                                  dropdown(inputId ="btn_virus", style = "simple",icon = icon("virus"), width = "800px", color = "primary", right = TRUE,
                                           column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days"), h3(id ="info-label","7-days change")),
                                           column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly()))), h3(paste(weeklyCasesChange(), "%"))),

@@ -1,5 +1,7 @@
 source("data/population.R")
 source("data/covid19Data.R")
+library(dplyr)
+
 c <- casesDataSet
 d <- deathsDataSet 
 r <- recoveredDataSet
@@ -13,16 +15,34 @@ c <- c %>% group_by(`Country/Region`) %>% summarise(Cases = sum(lastDate))
 d <- d %>% group_by(`Country/Region`) %>% summarise(Deaths = sum(lastDate))
 r <- r %>% group_by(`Country/Region`) %>% summarise(Recovered = sum(lastDate))
 
-population <- pop[order(pop$country),]
-population <- population[-189,]
+popList <- pop[order(pop$country),]
+popList <- popList[-c(132,189),]
 
-c <- c[-49,]
-d <- d[-49,]
-r <- r[-49,]
+c <- c[-c(49,118),]
+d <- d[-c(49,118),]
+r <- r[-c(49,118),]
 
-df <- data.frame(c,r$Recovered,d$Deaths,population$population)
+
+cases1MPop <- c()
+for(i in 1:length(c$Cases)){
+  cases1MPop[i]  <- ceiling(c$Cases[i]/popList$population[i] * 1000000)
+}
+deaths1MPop <- c()
+for(i in 1:length(d$Deaths)){
+  deaths1MPop[i]  <- ceiling(d$Deaths[i]/popList$population[i] * 1000000)
+}
+caseFatalityRate <- c()
+for(i in 1:length(d$Deaths)){
+  holder <- d$Deaths[i] / c$Cases[i] * 100
+  caseFatalityRate[i] <- paste(format(round(holder, 2), nsmall = 2),"%")
+}
+
+df <- data.frame(c,r$Recovered,d$Deaths,cases1MPop, deaths1MPop, caseFatalityRate,popList$population)
 
 names(df)[1] <- "Country"
 names(df)[3] <- "Recovered"
 names(df)[4] <- "Deaths"
-names(df)[5] <- "Population"
+names(df)[5] <- "Cases/1M Population"
+names(df)[6] <- "Deaths/1M Population"
+names(df)[7] <- "Case Fatality Rate"
+names(df)[8] <- "Population"
