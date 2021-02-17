@@ -246,3 +246,20 @@ cummulativePlotDeaths <- function(countrySelected,daysToForecast){
   return(plot)
 }
 
+### Test functions
+decomposeDataOfSelectedCountry <- function(countrySelected){
+  
+  timeSeries <- ts(countrySelected$daily, frequency = 12)
+  decomposed <- stl(timeSeries, s.window = 30)
+  
+  #t <- data.frame(countrySelected$formatedDate, decomposed$time.series[,1], decomposed$time.series[,2],  decomposed$time.series[,3] )
+  #colnames(t)[1] <- "date"
+  #colnames(t)[2] <- "seasonal"
+  #colnames(t)[3] <- "trend"
+  #colnames(t)[4] <- "remainder"
+  
+  plot(decomposed)
+  return(hchart(decomposed))
+  
+
+}

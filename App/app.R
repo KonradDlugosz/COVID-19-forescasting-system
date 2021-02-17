@@ -12,6 +12,7 @@ library(shinyjs)
 library(shinycssloaders)
 library(shinyalert)
 library(forecast)
+library(highcharter)
 
 ### Sources ####
 source("data/covid19Data.R")
@@ -39,11 +40,6 @@ ui <- dashboardPage(
                                  text = paste(formatLargeNumber(todayDeaths()), "new deaths"),
                                  icon = icon("skull-crossbones"),
                                  status = "danger"
-                               ),
-                               notificationItem(
-                                 text = paste(formatLargeNumber(todayActiveCases()), "active cases"),
-                                 icon = icon("globe-europe"),
-                                 status = "warning"
                                )
                   )),
   dashboardSidebar( collapsed = TRUE,
@@ -128,21 +124,23 @@ ui <- dashboardPage(
                          box(id = "mainPanel", solidHeader = TRUE, width = 12, height = "auto",
                              box(width = 4,  solidHeader = TRUE, align = "center", height = "160px",
                                  column(2, align="left", actionBttn(inputId = "backDash", label = NULL, style = "material-circle",  color = "primary",icon = icon("arrow-left"))),
-                                 column(10,h2(textOutput("selectedCountryDisplay")),
-                                        h3(textOutput("population")))),
+                                 column(10,h1(textOutput("selectedCountryDisplay")),
+                                        h2(textOutput("population")))),
                              box(width = 8, solidHeader = TRUE, height = "160px",
-                                 column(3, h2("Cases"), h3(id = "info_text",textOutput("casesInCountry"))),
-                                 column(3, h2("Recovered"), h3(id = "info_text",textOutput("recoveredInCountry"))),
-                                 column(3 ,h2("Deaths"), h3(id = "info_text",textOutput("deathsInCountry"))),
-                                 column(3, h2("Active"), h3(id= "activecases_text",textOutput("activeInCountry")))
+                                 column(3, h2("Cases"), h3(id = "info_text",textOutput("casesInCountry")), h4(id ="info-label",textOutput("percentageCases"))),
+                                 column(3, h2("Recovered"), h3(id = "info_text",textOutput("recoveredInCountry")),h4(id ="info-label",textOutput("percentageRecovered"))),
+                                 column(3 ,h2("Deaths"), h3(id = "info_text",textOutput("deathsInCountry")),h4(id ="info-label",textOutput("percentageDeaths"))),
+                                 column(3, h2("Active"), h3(id= "activecases_text",textOutput("activeInCountry")),h4(id ="info-label",textOutput("percentageActive")))
                                  ),
                              box(width = 12, solidHeader = TRUE, height = "auto",
                                  mainPanel(
                                    h3(textOutput("countryPlotTitle")),
                                    shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily")),
-                                   column(7, align = "right", h4(textOutput("MFE"))),
-                                   column(5, align = "left",dropdown(style = "jelly", icon = icon("question"), color = "primary",
-                                                      p(id ="info-label","This value shows on average, how many values the forecasat was away from actual.")))
+                                   h3("Forecast Accuracy"),
+                                   h4(textOutput("MFE")),
+                                   p(id ="info-label","This value shows on average, how many values the forecasat was away from actual."),
+                                   p(id ="info-label","Use the controls provided to alter the plot. The controls allow to toggle between cases and deaths of a country."),
+                                   p(id ="info-label","The forecasting is using faword-feed neural network alogorithm for given number of days use the knob in controls."),
                                    ),
                                  sidebarPanel( align = "center", id = "sidebarControls",
                                                selectInput("country", 
@@ -161,12 +159,26 @@ ui <- dashboardPage(
                                                knobInput(inputId = "daysToForecast", label = "Days to forecast:",
                                                  value = 14, min = 0, max = 30, displayPrevious = TRUE,
                                                  fgColor = "#428BCA",inputColor = "#428BCA"
-                                               ),
-                                               dropdown(style = "jelly", icon = icon("question"), color = "primary", align = "right",
-                                                        p(id ="info-label","Forecast done using Feed-forward neural networks."),
-                                                        p(id ="info-label", "Plases note, more days to forecast becomes less accurate."))
+                                               )
                                                ), 
                                  ),
+                             box(width = 8, solidHeader = TRUE, height = "auto",
+                                 h3("Decompsed Data"),
+                                 shinycssloaders::withSpinner(highchartOutput("sesonality"))
+                             ),
+                             box(width = 4, solidHeader = TRUE, height = "auto",
+                                 h3("What is decomposition of time series ?"),
+                                 p(id ="info-label","The decomposition of time series is a statistical task that deconstructs a 
+                                   time series into several components, each representing one of the underlying categories of patterns"),
+                                 br(),
+                                 h4("The seasonal component"),
+                                 p(id ="info-label","A seasonal pattern exists when a time series is influenced by seasonal factors."),
+                                 h4("The trend component"),
+                                 p(id ="info-label","Reflects the long-term progression of the series. A trend exists when there is a
+                                   persistent increasing or decreasing direction in the data."),
+                                 h4("The remainder component"),
+                                 p(id ="info-label","It represents the residuals or remainder of the time series after the other components have been removed.")
+                                 )
                              )),
                   ))),
       #### Plots ENDS ----------------------------------------------------------###
@@ -267,23 +279,33 @@ server <- function(input, output, session) {
   observeEvent(input$backDash, {
     updateTabItems(session, "sideBarMenu", "dashboard")
   })
-  # Display country situation
+  # Display country situation numbers
   output$casesInCountry <- renderText({
-    paste(formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases"))), "(",
-          returnPercentageOfPopulation(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")),input$country), "%", ")" )
+    formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")))
   })
   output$recoveredInCountry <- renderText({
-    paste(formatLargeNumber(returnSumRecoveredOfCountry(input$country)), "(", 
-          returnPercentageOfPopulation(returnSumRecoveredOfCountry(input$country),input$country), "%", ")")
+    formatLargeNumber(returnSumRecoveredOfCountry(input$country))
   })
   output$deathsInCountry <- renderText({
-    paste(formatLargeNumber(returnSumDeathsOfCountry(input$country)), "(",
-          returnPercentageOfPopulation(returnSumDeathsOfCountry(input$country),input$country), "%", ")")
+    formatLargeNumber(returnSumDeathsOfCountry(input$country))
   })
   output$activeInCountry <- renderText({
-    paste(formatLargeNumber(returnActiveCases(input$country)), "(",
-          returnPercentageOfPopulation(returnActiveCases(input$country),input$country), "%", ")" )
+    formatLargeNumber(returnActiveCases(input$country))
     
+  })
+  
+  # Display percentage of population
+  output$percentageCases <- renderText({
+    paste( returnPercentageOfPopulation(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")),input$country), "%", "of population" )
+  })
+  output$percentageRecovered <- renderText({
+    paste( returnPercentageOfPopulation(returnSumRecoveredOfCountry(input$country),input$country), "%", "of population" )
+  })
+  output$percentageDeaths <- renderText({
+    paste( returnPercentageOfPopulation(returnSumDeathsOfCountry(input$country),input$country), "%", "of population" )
+  })
+  output$percentageActive <- renderText({
+    paste( returnPercentageOfPopulation(returnActiveCases(input$country),input$country), "%", "of population" )
   })
   
   # Interactive plots 
@@ -311,6 +333,11 @@ server <- function(input, output, session) {
   # Display title for plot
   output$countryPlotTitle <- renderText({
     returnTitleOfCountryPlots(input$switchGraphType,input$switchData)
+  })
+  
+  # Display seasonality of selected country
+  output$sesonality <- renderHighchart({
+    decomposeDataOfSelectedCountry(createTimeSeiresForCountry(input$country,input$switchData))
   })
   
   # Plots Ends -----------------------------------------------------------------
