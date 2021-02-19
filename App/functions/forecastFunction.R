@@ -1,6 +1,7 @@
 # This file contains forecasting methods
 #### Neural Network forward feed time series forecast function ####
 createNuralNetworkTSForecast <- function(countrySelected,daysToForecast){
+  #countrySelected <- createTimeSeiresForCountry("Poland", "cases")
   # Default days to forecast 
   if(missing(daysToForecast)){
     daysToForecast = 14
@@ -11,8 +12,8 @@ createNuralNetworkTSForecast <- function(countrySelected,daysToForecast){
   
   # 2. Train model
   fit <- nnetar(df, repeats = 20)
-  fcast <- forecast(fit, h = daysToForecast)
-  
+  fcast <- forecast(fit, h = daysToForecast, level = 95)
+
   # 3. Create dataframe for forecast values
   newDates <- data$formatedDate[nrow(data)] + 1
   for(i in 1:daysToForecast){

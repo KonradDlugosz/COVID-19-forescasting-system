@@ -56,7 +56,7 @@ body {
 }
 
 
-#btn_plots, #btn_virus{
+#btn_plots, #btn_virus,#btn_about{
   width: 130px;
   height: 130px;
   font-size: 70px;
@@ -74,15 +74,28 @@ body {
 #increase {
   color:#808080;
 }
-#info_text {
+
+#cases_text {
+  color:#ff6600;
+  font-weight: bold;
+}
+#recovered_text {
   color:#3399ff;
+  font-weight: bold;
+}
+
+#deaths_text {
+  color:#ff0000;
+  font-weight: bold;
+}
+#activecases_text {
+  color:#00e6ac;
+  font-weight: bold;
 }
 #info-label {
   color:#808080;
 }
-#activecases_text {
-  color:#00e6ac;
-}
+
 
 #sort_downIcon {
   color: #00ff00;
@@ -102,6 +115,21 @@ body {
 /*PLOTS PAGE*/
 #sidebarControls {
  opacity: 0.8;
+}
+
+#seasonal_component {
+  color:#0066cc;
+  font-weight: bold;
+}
+
+#trend_component {
+  color:#00cc66;
+  font-weight: bold;
+}
+
+#remainder_component{
+  color: #e6e600;
+  font-weight: bold;
 }
 
 /*MAP*/

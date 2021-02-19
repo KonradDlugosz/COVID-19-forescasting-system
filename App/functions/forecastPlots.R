@@ -2,7 +2,7 @@
 #### Sources ####
 source("data/covid19Data.R")
 source("data/population.R")
-source("functions/forecasting.R")
+source("functions/forecastFunction.R")
 library(ggplot2)
 library(TTR)
 library(dplyr)

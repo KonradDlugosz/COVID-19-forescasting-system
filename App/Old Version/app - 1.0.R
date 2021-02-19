@@ -18,8 +18,8 @@ library(highcharter)
 source("data/covid19Data.R")
 source("data/dataDisplay.R")
 source("functions/dashPlots.R")
-source("functions/countryPlots.R")
-source("functions/forecasting.R")
+source("functions/forecastPlots.R")
+source("functions/forecastFunction.R")
 source("functions/pieChart.R")
 source("functions/mapHighChart.R")
 
@@ -93,20 +93,24 @@ ui <- dashboardPage(
                                                     p(id ="info-label", "Please note that this data might not be 100% accurate due to mistakes like system errors or human error.")))
                                  ),
                              br(),
-                             box(solidHeader = TRUE, width = 8, shinycssloaders::withSpinner(highchartOutput("dashMap"))),
+                             box(solidHeader = TRUE, width = 8, height = "900px",
+                                 shinycssloaders::withSpinner(highchartOutput("dashMap", height = "850px"))),
                              box(solidHeader = TRUE, width = 4, shinycssloaders::withSpinner(highchartOutput("casesHighChart"))),
-                             box(solidHeader = TRUE, width = 10,title = "Global daily situation with 14 days of forecast", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot"))),
-                             box(solidHeader = TRUE, width = 2, height = "450px",
-                                 dropdown(inputId ="btn_virus", style = "simple",icon = icon("virus"), width = "800px", color = "primary", right = TRUE,
-                                          column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days"), h3(id ="info-label","7-days change")),
-                                          column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly()))), h3(paste(weeklyCasesChange(), "%"))),
-                                          column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
-                                          column(2,h3("Deaths"), h3(id = "info_text",formatLargeNumber(todayDeaths())),h3(id = "info_text",formatLargeNumber(sum(newDeathsWeekly())))),
-                                          column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases()))),
-                                          column(12, p(id ="info-label", "Please note this infomration may be incomplete and not 100% accuarate"))),
-                                 h4("Situation"),
-                                 actionButton("btn_plots", "", icon = icon("chart-line")),
-                                 h4("Country Forecast"),
+                             box(solidHeader = TRUE, width = 4,title = "Global daily situation with 14 days of forecast", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot"))),
+                             box(solidHeader = TRUE, width = 12,
+                                 column(4,                                 
+                                        actionButton("btn_plots", "", icon = icon("chart-line")),
+                                        h3("Country Forecast")),
+                                 column(4,
+                                        dropdown(inputId ="btn_virus", style = "simple",icon = icon("virus"), width = "800px", color = "primary",
+                                                 column(3,h3("Situation:"),h3(id ="info-label","New"), h3(id ="info-label","7-days"), h3(id ="info-label","7-days change")),
+                                                 column(2,h3("Cases"),h3(id = "info_text",formatLargeNumber(todayCases())), h3(id = "info_text",formatLargeNumber(sum(newCasesWeekly()))), h3(paste(weeklyCasesChange(), "%"))),
+                                                 column(2,h3("Recovered"), h3(id = "info_text",formatLargeNumber(todayRecovered())), h3(id = "info_text",formatLargeNumber(weeklyRecovered()))),
+                                                 column(2,h3("Deaths"), h3(id = "info_text",formatLargeNumber(todayDeaths())),h3(id = "info_text",formatLargeNumber(sum(newDeathsWeekly())))),
+                                                 column(2,h3("Active"), h3(id= "activecases_text",formatLargeNumber(todayActiveCases())), h3(id = "activecases_text",formatLargeNumber(weeklyActiveCases()))),
+                                                 column(12, p(id ="info-label", "Please note this infomration may be incomplete and not 100% accuarate"))),
+                                        h4("Situation"),
+                                        ),
                              ),
                              box(solidHeader = TRUE, width = 12,
                                  dataTableOutput("dataDisplay"))
@@ -171,12 +175,12 @@ ui <- dashboardPage(
                                  p(id ="info-label","The decomposition of time series is a statistical task that deconstructs a 
                                    time series into several components, each representing one of the underlying categories of patterns"),
                                  br(),
-                                 h4("The seasonal component"),
+                                 h4(id = "seasonal_component","The seasonal component"),
                                  p(id ="info-label","A seasonal pattern exists when a time series is influenced by seasonal factors."),
-                                 h4("The trend component"),
+                                 h4(id = "trend_component","The trend component"),
                                  p(id ="info-label","Reflects the long-term progression of the series. A trend exists when there is a
                                    persistent increasing or decreasing direction in the data."),
-                                 h4("The remainder component"),
+                                 h4(id = "remainder_component","The remainder component"),
                                  p(id ="info-label","It represents the residuals or remainder of the time series after the other components have been removed.")
                                  )
                              )),
@@ -201,7 +205,7 @@ server <- function(input, output, session) {
   })
   #Plot
   output$mainTimeSeriesPlot <- renderHighchart({
-    dailyCasesPlot()
+    casesPlot()
   })
   # Pie chart
   output$casesHighChart <- renderHighchart({
@@ -212,7 +216,7 @@ server <- function(input, output, session) {
   observeEvent(input$btn_totalCases, {
     #Plot
     output$mainTimeSeriesPlot <- renderHighchart({
-      dailyCasesPlot()
+      casesPlot()
     })
     # Pie chart
     output$casesHighChart <- renderHighchart({
@@ -227,7 +231,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$btn_totalRecovered, {
     output$mainTimeSeriesPlot <- renderHighchart({
-      dailyRecoveredPlot()
+      recoveredPlot()
     })
     
     output$casesHighChart <- renderHighchart({
@@ -241,7 +245,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$btn_totalDeaths, {
     output$mainTimeSeriesPlot <- renderHighchart({
-      dailyDeathsPlot()
+      deathsPlot()
     }) 
     
     output$casesHighChart <- renderHighchart({
@@ -261,7 +265,7 @@ server <- function(input, output, session) {
       pieControler("active")
     })
     output$mainTimeSeriesPlot <- renderHighchart({
-      dailyActivePlot()
+      activePlot()
     }) 
   })
   # Quick access buttons 
