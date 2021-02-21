@@ -103,7 +103,6 @@ selectDashPlot <- function(dataSelceted, plotSelected){
     }
   }
   
-  
 }
 #### CASES #### 
 dailyCasesPlot <- function(){
@@ -204,12 +203,15 @@ cumulativeDeathsPlot <- function(){
 
 activePlot <- function() {
   # Load active cases data
+  forecastData <- createNuralNetworkTSForecast(timeSeiresCasesDaily)
   df <- activeCasesTimeSeries()
 
   plot <- df %>% hchart("line", 
     hcaes(x = date  , y = active), name = "Active cases") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   
   return(plot)
 }
+

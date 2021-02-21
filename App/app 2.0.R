@@ -132,8 +132,8 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                                              choices = c(`<i class="fas fa-head-side-mask"></i>` = "cases",`<i class="fas fa-skull-crossbones"></i>`= "deaths"),
                                                                              justified = TRUE,size = "lg"
                                                            ),
-                                                           column(8 ,h3("Moving Average: ")),
-                                                           column(4 ,br(),switchInput(inputId = "movingAverage", value = FALSE)),
+                                                           column(6 ,align = "right",h3("Moving Average: ")),
+                                                           column(6 , align = "left",br(),switchInput(inputId = "movingAverage", value = FALSE)),
                                                            knobInput(inputId = "daysToForecast", label = "Days to forecast:",
                                                                      value = 14, min = 0, max = 30, displayPrevious = TRUE,
                                                                      fgColor = "#428BCA",inputColor = "#428BCA"
@@ -141,14 +141,14 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                              ), 
                                          ),
                                          box(width = 8, solidHeader = TRUE, height = "auto",
-                                             h3("Decompsed Data"),
+                                             h3("View of Data Decomposition"),
                                              shinycssloaders::withSpinner(highchartOutput("sesonality"))
                                          ),
                                          box(width = 4, solidHeader = TRUE, height = "auto",
                                              h3("What is decomposition of time series ?"),
-                                             p(id ="info-label","The decomposition of time series is a statistical task that deconstructs a 
-                                   time series into several components, each representing one of the underlying categories of patterns"),
-                                             br(),
+                                             p(id ="info-label","Deconstruction of time series into several components, each representing one of the underlying categories of patterns"),
+                                             h4(id = "data_component","The data "),
+                                             p(id ="info-label","Data containing all the layers"),
                                              h4(id = "seasonal_component","The seasonal component"),
                                              p(id ="info-label","A seasonal pattern exists when a time series is influenced by seasonal factors."),
                                              h4(id = "trend_component","The trend component"),
