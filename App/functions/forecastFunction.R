@@ -1,7 +1,6 @@
 # This file contains forecasting methods
 #### Neural Network forward feed time series forecast function ####
 createNuralNetworkTSForecast <- function(countrySelected,daysToForecast){
-  #countrySelected <- createTimeSeiresForCountry("Poland", "cases")
   # Default days to forecast 
   if(missing(daysToForecast)){
     daysToForecast = 14
@@ -14,7 +13,7 @@ createNuralNetworkTSForecast <- function(countrySelected,daysToForecast){
   fit <- nnetar(df, repeats = 20)
   fcast <- forecast(fit, h = daysToForecast, level = 95)
 
-  # 3. Create dataframe for forecast values
+  # 3. Create df for forecast values
   newDates <- data$formatedDate[nrow(data)] + 1
   for(i in 1:daysToForecast){
     newDates[i] <- data$formatedDate[nrow(data)] + i
@@ -23,45 +22,55 @@ createNuralNetworkTSForecast <- function(countrySelected,daysToForecast){
   dfForecastedCases <- data.frame(newDates, forcast)
   
   # 4. Check the accuracy of the model
-  squereRootError <- na.omit(fit$residuals) ^ 2
-  meanSquereRootError <- mean(squereRootError)
-  rootMeanSquaredError <- sqrt(meanSquereRootError)
-  dfForecastedCases$rootMeanSquaredError <- ceiling(rootMeanSquaredError)
+  squereError <- na.omit(fit$residuals) ^ 2
+  meanSquereError <- mean(squereError)
+  rootMeanSquaredError <- sqrt(meanSquereError)
+  absoluteForecastError <- abs(floor(fit$residuals))
+  
+  # Remove NA and zero
+  cleanabsoluteForecastError <- c()
+  for(i in 1 : length(absoluteForecastError)){
+    if((is.na(absoluteForecastError[i]) | fit$x[i]== 0)){
+      cleanabsoluteForecastError[i] <- 0
+    }
+    else {
+      cleanabsoluteForecastError[i] <- absoluteForecastError[i]/  fit$x[i] * 100
+    }
+  }
+  meanAbsolutePercentError <- mean(cleanabsoluteForecastError)
+  
+  # 5. add accuracy results to forecast error
+  dfForecastedCases$RMSE <- floor(rootMeanSquaredError)
+  dfForecastedCases$MAFE <- floor(meanAbsolutePercentError)
   
   return(dfForecastedCases)
 }
 
-# ARIMA MODEL - not used
-#t <- createTimeSeiresForCountry("Poland")
-#rownames(t) <- t[,1]
-#data  <- t  %>% 
-#  select(daily)
+###ARIMA MODEL
+#fit <- auto.arima(df)
+#fcast <- forecast(fit, h = daysToForecast, level = 95)
+#hchart(fcast)
 
-#tsData = ts(data$daily)
-#data$clean = tsclean(tsData)
-#data$movingAvg = ma(data$clea, order= 7)
+### ARIMA MODEL
+#plot(forecast(auto.arima(ts(df,frequency=7)),h=30))
 
-#finalTsData <- ts(na.omit(data$movingAvg), frequency = 7)
-#decomp = stl(finalTsData, s.window = "periodic")
+### CROSTON MODEL
+#plot(forecast(bats(ts(df,frequency=7), D= 1),h=30))
 
-#### DICOMPSITION OF THE DATA - Seasonality, trend, cycle ###
-# Calculate seasonal 
-#count_ma = ts(na.omit(forecastData$cnt_ma), frequency = 7)
-#decomp = stl(count_ma, s.window = "periodic")
+### NEURAL NETWORK
+#plot(forecast(nnetar(ts(df,frequency=7)),h=30))
 
-#desesonal_cnt <- seasadj(decomp)
-#count_d1 = diff(desesonal_cnt, differences = 1)
-
-
-#x <- stl(log(AirPassengers), "per")
-#hc <- hchart(x)
+### ETS MODEL
+#plot(forecast(ets(ts(df,frequency=7)),h=30))
 
 #### Other functions ####
 # Normalize function 
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
-# Normalize data
-#data$daily[1] <- 1 # add missing value, gives error without it.
-#data$daily_norm <- normalize(data$daily)
 
+# Identify and replace outliers and missing values in a time series
+#tsclean(df)
+
+### test functions 
+#countrySelected <- createTimeSeiresForCountry("United Kingdom", "cases")

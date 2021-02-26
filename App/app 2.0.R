@@ -85,7 +85,9 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                     ),
                                              )),
                                          box(solidHeader = TRUE, width = 4, shinycssloaders::withSpinner(highchartOutput("casesHighChart"))),
-                                         box(solidHeader = TRUE, width = 4,title = "Global situation with 14 days of forecast", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot"))),
+                                         box(solidHeader = TRUE, width = 4,title = "Global situation with 14 days of forecast", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot")),
+                                             tableOutput("accuracyTableDash")
+                                             ),
                                      )),
                             )
                           )),
@@ -111,14 +113,15 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                h3(textOutput("countryPlotTitle")),
                                                shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily", height = "450px")),
                                                h3("Forecast Accuracy"),
-                                               column(8, align = "right", h4(textOutput("MFE"))),
-                                               column(4, align = "left",dropdown(style = "jelly", icon = icon("question"), color = "primary",
-                                                                                 h4("What this value mean ? "),
-                                                                                 p(id ="info-label","This value shows on average, how many values the forecasat was away from actual.")),
-                                                      br()),
-                                               br(),
-                                               p(id ="info-label","Use the controls provided to alter the plot. The controls allow to toggle between cases and deaths of a country."),
-                                               p(id ="info-label","The forecasting is using faword-feed neural network alogorithm for given number of days use the knob in controls."),
+                                               tableOutput("accuracyTable"),
+                                               dropdown(style = "jelly", icon = icon("question"), color = "primary",
+                                                        h3("What this value mean ? "),
+                                                        h4("Root Mean Square Error(RMSE)"),
+                                                        p(id ="info-label","This value shows on average, how many values the forecasat was away from actual."),
+                                                        h4("Mean Absolute Forecast Error(MAFE)"),
+                                                        p(id ="info-label","It signifies % of average deviation of the forecast from the actual value in the given model."),
+                                                        ),
+                                               br()
                                              ),
                                              sidebarPanel( align = "center", id = "sidebarControls",
                                                            selectInput("country", 
@@ -137,7 +140,10 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                            knobInput(inputId = "daysToForecast", label = "Days to forecast:",
                                                                      value = 14, min = 0, max = 30, displayPrevious = TRUE,
                                                                      fgColor = "#428BCA",inputColor = "#428BCA"
-                                                           )
+                                                           ),
+                                                           dropdown(style = "jelly", icon = icon("question"), color = "primary",
+                                                                    p(id ="info-label","Use the controls provided to alter the plot. The controls allow to toggle between cases and deaths of a country."),
+                                                                    p(id ="info-label","The forecasting is using faword-feed neural network alogorithm for given number of days use the knob in controls."))
                                              ), 
                                          ),
                                          box(width = 8, solidHeader = TRUE, height = "auto",
@@ -197,6 +203,11 @@ server <- function(input, output, session) {
     hcmapSelector("cases")
   })
   
+  # Forecast Accuracy
+  output$accuracyTableDash <- renderTable({ 
+    accurcyTable(timeSeiresCasesDaily, 14) 
+  })
+  
   # Main Buttons 
   observeEvent(input$btn_totalCases, {
     #Plot
@@ -210,6 +221,10 @@ server <- function(input, output, session) {
     # Map
     output$dashMap <- renderHighchart({
       hcmapSelector("cases")
+    })
+    # Forecast Accuracy
+    output$accuracyTableDash <- renderTable({ 
+      accurcyTable(timeSeiresCasesDaily, 14) 
     })
     
   })
@@ -226,6 +241,9 @@ server <- function(input, output, session) {
     output$dashMap <- renderHighchart({
       hcmapSelector("recovered")
     })
+    output$accuracyTableDash <- renderTable({ 
+      accurcyTable(timeSeiresRecoveredDaily, 14) 
+    })
   })
   
   observeEvent(input$btn_totalDeaths, {
@@ -240,6 +258,9 @@ server <- function(input, output, session) {
     output$dashMap <- renderHighchart({
       hcmapSelector("deaths")
     })
+    output$accuracyTableDash <- renderTable({ 
+      accurcyTable(timeSeiresDeathsDaily, 14) 
+    })
   })
   
   observeEvent(input$btn_totalActive, {
@@ -252,10 +273,6 @@ server <- function(input, output, session) {
     output$dashMap <- renderHighchart({
       hcmapSelector("active")
     })
-  })
-  # Quick access buttons 
-  observeEvent(input$btn_plots, {
-    updateTabItems(session, "sideBarMenu", "plots")
   })
   
   # Data Display
@@ -303,9 +320,9 @@ server <- function(input, output, session) {
   output$value1 <- renderPrint({ input$switchGraphType })
   output$value2 <- renderPrint({ input$switchData })
   # Accuracy for forecast
-  output$MFE <- renderText({ 
-    paste("Root Mean Squared Error (RMSE):",accurcyOfForecast(createTimeSeiresForCountry(input$country,input$switchData),input$daysToForecast)) 
-    })
+  output$accuracyTable <- renderTable({ 
+    accurcyTable(createTimeSeiresForCountry(input$country,input$switchData),input$daysToForecast) 
+  })
   
   # Display Country selected
   output$selectedCountryDisplay <- renderText({

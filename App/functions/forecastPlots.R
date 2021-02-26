@@ -162,11 +162,17 @@ interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToFore
   }
 } 
 
-accurcyOfForecast <- function(countrySelected,daysToForecast){
+accurcyTable <- function(countrySelected,daysToForecast){
   forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
-  rootMeanSquaredError <- forecastData$rootMeanSquaredError[1]
-  return(rootMeanSquaredError)
+  Method <- c("Neural Network")
+  df <- data.frame(Method,forecastData$RMSE[1], paste(forecastData$MAFE[2], "%"))
+  names(df)[2] <- "RMSE"
+  names(df)[3] <- "MAFE"
+  
+  return(df)
 }
+#countrySelected <- createTimeSeiresForCountry("Poland","cases")
+#daysToForecast <- 14
 
 #### CASES ####
 dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast){
