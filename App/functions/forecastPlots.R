@@ -163,11 +163,14 @@ interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToFore
 } 
 
 accurcyTable <- function(countrySelected,daysToForecast){
-  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
-  Method <- c("Neural Network")
-  df <- data.frame(Method,forecastData$RMSE[1], paste(forecastData$MAFE[2], "%"))
+  forecastData <- createForecastModel(countrySelected,daysToForecast)
+  Method <- c("Neural Network", "ARIMA", "Ets", "Bats")
+  rmse <- c( forecastData$nnetar[1], forecastData$arima[1], forecastData$ets[1], forecastData$bats[1] )
+  mape <- c( paste(floor(forecastData$nnetar[2]), "%"),paste(floor(forecastData$arima[2]), "%"),
+             paste(floor(forecastData$ets[2]), "%"),paste(floor(forecastData$bats[2]), "%") )
+  df <- data.frame(Method,rmse,mape )
   names(df)[2] <- "RMSE"
-  names(df)[3] <- "MAFE"
+  names(df)[3] <- "MAPE"
   
   return(df)
 }
@@ -177,13 +180,13 @@ accurcyTable <- function(countrySelected,daysToForecast){
 #### CASES ####
 dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast){
   # Forecast data
-  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  forecastData <- createForecastModel(countrySelected,daysToForecast,"NNETAR")
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Observed") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
   # Check if to apply 
@@ -196,7 +199,7 @@ dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast){
 
 cummulativePlotCases <- function(countrySelected,daysToForecast){
   # Forecast data
-  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  forecastData <- createForecastModel(countrySelected,daysToForecast)
   # Change forecast to cumulative
   lastDataPoint <- countrySelected$df[nrow(countrySelected)]
   forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
@@ -206,7 +209,7 @@ cummulativePlotCases <- function(countrySelected,daysToForecast){
   
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = df), name = "Observed") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
   
@@ -216,13 +219,13 @@ cummulativePlotCases <- function(countrySelected,daysToForecast){
 #### DEATHS ####
 dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast){
   # Forecast data
-  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  forecastData <- createForecastModel(countrySelected,daysToForecast)
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Observed") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   # Check if to apply 
@@ -235,7 +238,7 @@ dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast){
 
 cummulativePlotDeaths <- function(countrySelected,daysToForecast){
   # Forecast data
-  forecastData <- createNuralNetworkTSForecast(countrySelected,daysToForecast)
+  forecastData <- createForecastModel(countrySelected,daysToForecast)
   # Change forecast to cumulative
   lastDataPoint <- countrySelected$df[nrow(countrySelected)]
   forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
@@ -245,7 +248,7 @@ cummulativePlotDeaths <- function(countrySelected,daysToForecast){
   
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = df), name = "Observed") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   

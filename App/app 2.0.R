@@ -85,8 +85,7 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                     ),
                                              )),
                                          box(solidHeader = TRUE, width = 4, shinycssloaders::withSpinner(highchartOutput("casesHighChart"))),
-                                         box(solidHeader = TRUE, width = 4,title = "Global situation with 14 days of forecast", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot")),
-                                             tableOutput("accuracyTableDash")
+                                         box(solidHeader = TRUE, width = 4,title = "Global situation", shinycssloaders::withSpinner(highchartOutput("mainTimeSeriesPlot")),
                                              ),
                                      )),
                             )
@@ -112,7 +111,7 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                              mainPanel(
                                                h3(textOutput("countryPlotTitle")),
                                                shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily", height = "450px")),
-                                               h3("Forecast Accuracy"),
+                                               h3("Model Accuracy"),
                                                tableOutput("accuracyTable"),
                                                dropdown(style = "jelly", icon = icon("question"), color = "primary",
                                                         h3("What this value mean ? "),
@@ -203,11 +202,6 @@ server <- function(input, output, session) {
     hcmapSelector("cases")
   })
   
-  # Forecast Accuracy
-  output$accuracyTableDash <- renderTable({ 
-    accurcyTable(timeSeiresCasesDaily, 14) 
-  })
-  
   # Main Buttons 
   observeEvent(input$btn_totalCases, {
     #Plot
@@ -221,10 +215,6 @@ server <- function(input, output, session) {
     # Map
     output$dashMap <- renderHighchart({
       hcmapSelector("cases")
-    })
-    # Forecast Accuracy
-    output$accuracyTableDash <- renderTable({ 
-      accurcyTable(timeSeiresCasesDaily, 14) 
     })
     
   })
@@ -241,9 +231,6 @@ server <- function(input, output, session) {
     output$dashMap <- renderHighchart({
       hcmapSelector("recovered")
     })
-    output$accuracyTableDash <- renderTable({ 
-      accurcyTable(timeSeiresRecoveredDaily, 14) 
-    })
   })
   
   observeEvent(input$btn_totalDeaths, {
@@ -257,9 +244,6 @@ server <- function(input, output, session) {
     
     output$dashMap <- renderHighchart({
       hcmapSelector("deaths")
-    })
-    output$accuracyTableDash <- renderTable({ 
-      accurcyTable(timeSeiresDeathsDaily, 14) 
     })
   })
   

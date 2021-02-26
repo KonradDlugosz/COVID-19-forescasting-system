@@ -106,12 +106,9 @@ selectDashPlot <- function(dataSelceted, plotSelected){
 }
 #### CASES #### 
 dailyCasesPlot <- function(){
-  # Forecast Cases
-  forecastData <- createNuralNetworkTSForecast(timeSeiresCasesDaily)
   # Daily plot
   plot <-timeSeiresCasesDaily %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Obsereved Cases") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
   
@@ -119,30 +116,18 @@ dailyCasesPlot <- function(){
 }
 
 cumulativeCasesPlot <- function(){
-  #Forecast Cases
-  forecastData <- createNuralNetworkTSForecast(timeSeiresCasesDaily)
-  #Change forecast to cumulative
-  lastDataPoint <- timeSeiresCasesCumulative$total[nrow(timeSeiresCasesCumulative)]
-  forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
-  for(i in 2: nrow(forecastData)){
-    forecastData$forcast[i] <- forecastData$forcast[i] + forecastData$forcast[i -1]
-  }
   # Cumulative plot 
   plot <-timeSeiresCasesCumulative %>% hchart("line", 
     hcaes(x = formatedDate , y = total), name = "Obsereved Cases") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
   
   return(plot)
 }
 dailyRecoveredPlot <- function(){
-  # Forecast recovered
-  forecastData <- createNuralNetworkTSForecast(timeSeiresRecoveredDaily)
   # Daily plot
   plot <-timeSeiresRecoveredDaily %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Recovered") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Recovered"))
   
@@ -150,19 +135,9 @@ dailyRecoveredPlot <- function(){
 }
 
 cumulativeRecoveredPlot <- function(){
-  # Forecast recovered
-  forecastData <- createNuralNetworkTSForecast(timeSeiresRecoveredDaily)
-  
-  # Change forecast to cumulative
-  lastDataPoint <- timeSeiresRecoveredCumulative$total[nrow(timeSeiresRecoveredCumulative)]
-  forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
-  for(i in 2: nrow(forecastData)){
-    forecastData$forcast[i] <- forecastData$forcast[i] + forecastData$forcast[i -1]
-  }
   # Cumulative plot 
   plot <-timeSeiresRecoveredCumulative %>% hchart("line", 
     hcaes(x = formatedDate , y = total), name = "Recovered") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Recovered"))
   
@@ -170,31 +145,18 @@ cumulativeRecoveredPlot <- function(){
 }
 
 dailyDeathsPlot <- function(){
-  # Forecast deaths
-  forecastData <- createNuralNetworkTSForecast(timeSeiresDeathsDaily)
   # Daily deaths plot
   plot <-timeSeiresDeathsDaily %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Observed Deaths") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   
   return(plot)
 }
 cumulativeDeathsPlot <- function(){
-  #Forecast deaths
-  forecastData <- createNuralNetworkTSForecast(timeSeiresDeathsDaily)
-  
-  #Change forecast to cumulative
-  lastDataPoint <- timeSeiresDeathsCumulative$total[nrow(timeSeiresDeathsCumulative)]
-  forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
-  for(i in 2: nrow(forecastData)){
-    forecastData$forcast[i] <- forecastData$forcast[i] + forecastData$forcast[i -1]
-  }
   # Cumulative deaths 
   plot <-timeSeiresDeathsCumulative %>% hchart("line", 
     hcaes(x = formatedDate , y = total), name = "Observed Deaths") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   
@@ -203,12 +165,10 @@ cumulativeDeathsPlot <- function(){
 
 activePlot <- function() {
   # Load active cases data
-  forecastData <- createNuralNetworkTSForecast(timeSeiresCasesDaily)
   df <- activeCasesTimeSeries()
 
   plot <- df %>% hchart("line", 
     hcaes(x = date  , y = active), name = "Active cases") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, forcast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   
