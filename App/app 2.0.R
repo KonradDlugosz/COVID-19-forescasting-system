@@ -18,8 +18,8 @@ library(shinythemes)
 ### Sources ####
 source("data/covid19Data.R")
 source("data/dataDisplay.R")
-source("functions/dashPlots.R")
-source("functions/forecastPlots.R")
+source("functions/dashboard.R")
+source("functions/forecast.R")
 source("functions/forecastFunction.R")
 source("functions/pieChart.R")
 source("functions/mapHighChart.R")
@@ -268,7 +268,7 @@ server <- function(input, output, session) {
   # Plots Start ----------------------------------------------------------------
   # Display country situation numbers
   output$casesInCountry <- renderText({
-    formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")))
+    formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases"),input$country))
   })
   output$recoveredInCountry <- renderText({
     formatLargeNumber(returnSumRecoveredOfCountry(input$country))
@@ -283,7 +283,7 @@ server <- function(input, output, session) {
   
   # Display percentage of population
   output$percentageCases <- renderText({
-    paste( returnPercentageOfPopulation(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases")),input$country), "%", "of population" )
+    paste( returnPercentageOfPopulation(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases"),input$country),input$country), "%", "of population" )
   })
   output$percentageRecovered <- renderText({
     paste( returnPercentageOfPopulation(returnSumRecoveredOfCountry(input$country),input$country), "%", "of population" )

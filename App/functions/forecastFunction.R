@@ -10,7 +10,7 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod){
   }
   # 1. Load and format data
   data <- countrySelected
-  df <- ts(data$daily)
+  df <- ts(data[,3])
   
   # 2. Train models
   #### NNETAR MODEL

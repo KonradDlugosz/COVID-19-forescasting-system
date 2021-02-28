@@ -15,41 +15,52 @@ date <- colNames[5:numOfCol]
 formatedDate <- as.Date(date, format = "%m/%d/%y")
 
 # 2. Get country list
-countries <- casesDataSet[2]
+countries <- rbind("Global",casesDataSet[2])
 
 # Countries accruing more then once
 n_occur <- data.frame(table(casesDataSet[2]))
 duplicatedCountries <- n_occur[n_occur$Freq > 1,]
-  
+
 createTimeSeiresForCountry <- function(country, dataSelector){
-  # Check which data to load, Cases or Deaths
-  if(dataSelector == "cases"){
-    data <- casesDataSet
+  if(country == "Global"){
+    if(dataSelector == "cases"){
+      data <- timeSeiresGlobalCases
+    }
+    else if(dataSelector == "deaths"){
+      data <- timeSeiresGlobalDeaths
+    }
+    return(data)
   }
-  else if(dataSelector == "deaths"){
-    data <- deathsDataSet
+  else{
+    # Check which data to load, Cases or Deaths
+    if(dataSelector == "cases"){
+      data <- casesDataSet
+    }
+    else if(dataSelector == "deaths"){
+      data <- deathsDataSet
+    }
+    # Get data of selected country
+    if(country %in% duplicatedCountries$Var1){
+      df <- data %>% filter(data[2] == country)
+      df<- data.frame( colSums(df[5:numOfCol]))
+      names(df)[1] <- "df"
+    }
+    if(!country %in% duplicatedCountries$Var1) {
+      df <- data %>% filter(data[2]== country)
+      df <- df[5:numOfCol]
+      df<- t(df)
+    }
+    # Process data 
+    d <- data.frame(formatedDate, df)
+    rownames(d) <- NULL
+    # Add Daily change to data frame
+    d$daily[1] <- 0
+    for(i in 2:nrow(d)){
+      d$daily[i] <- d$df[i] - d$df[i - 1] 
+    }
+    
+    return(d)
   }
-  # Get data of selected country
-  if(country %in% duplicatedCountries$Var1){
-    df <- data %>% filter(data[2] == country)
-    df<- data.frame( colSums(df[5:numOfCol]))
-    names(df)[1] <- "df"
-  }
-  if(!country %in% duplicatedCountries$Var1) {
-    df <- data %>% filter(data[2]== country)
-    df <- df[5:numOfCol]
-    df<- t(df)
-  }
-  # Process data 
-  d <- data.frame(formatedDate, df)
-  rownames(d) <- NULL
-  # Add Daily change to data frame
-  d$daily[1] <- 0
-  for(i in 2:nrow(d)){
-    d$daily[i] <- d$df[i] - d$df[i - 1] 
-  }
-  
-  return(d)
 }
 
 # 3. Return functions
@@ -57,69 +68,95 @@ retrunListOfCountries <- function(){
   return(countries)
 }
 
-returnSumCasesOfCountry <- function(df){
-  dF <- df
-  total<-dF$df[nrow(dF)]
-  return(total)
-}
-
-returnPercentageOfPopulation <- function(casesNum,countryName){
-  popOfCountry <- pop %>% filter(country == countryName)
-  decimal <- casesNum/popOfCountry$population
-  percentage <- decimal * 100
-  percentage <- format(round(percentage, 2), nsmall = 2)
-  return(percentage)
+returnSumCasesOfCountry <- function(df, countrySelcted){
+  if(countrySelcted == "Global"){
+    return(timeSeiresGlobalCases$df[nrow(timeSeiresGlobalCases)])
+  }
+  else{
+    dF <- df
+    total<-dF$df[nrow(dF)]
+    return(total) 
+  }
 }
 
 returnSumRecoveredOfCountry <- function(country){
-  # Combine country into one value if appear more then once
-  if(country %in% duplicatedCountries$Var1){
-    df <- recoveredDataSet %>% filter(recoveredDataSet[2] == country)
-    df<- data.frame( colSums(df[5:numOfCol]))
-    names(df)[1] <- "df"
-    return(df$df[nrow(df)])
+  if(country == "Global"){
+    return(timeSeiresGlobalRecovered$df[nrow(timeSeiresGlobalRecovered)])
   }
-  # Return country if appears once
-  else if(!country %in% duplicatedCountries$Var1){
-    df <- recoveredDataSet %>% 
-    filter(recoveredDataSet[2] == country)
-    return(df[ncol(df)])
+  else{
+    # Combine country into one value if appear more then once
+    if(country %in% duplicatedCountries$Var1){
+      df <- recoveredDataSet %>% filter(recoveredDataSet[2] == country)
+      df<- data.frame( colSums(df[5:numOfCol]))
+      names(df)[1] <- "df"
+      return(df$df[nrow(df)])
+    }
+    # Return country if appears once
+    else if(!country %in% duplicatedCountries$Var1){
+      df <- recoveredDataSet %>% 
+        filter(recoveredDataSet[2] == country)
+      return(df[ncol(df)])
+    }
   }
   
 }
 
 returnSumDeathsOfCountry <- function(country){
-  # Combine country into one value if appear more then once
-  if(country %in% duplicatedCountries$Var1){
-    df <- deathsDataSet %>% filter(deathsDataSet[2] == country)
-    df<- data.frame( colSums(df[5:numOfCol]))
-    names(df)[1] <- "df"
-    return(df$df[nrow(df)])
+  if(country == "Global"){
+    return(timeSeiresGlobalDeaths$df[nrow(timeSeiresGlobalDeaths)])
   }
-  # Return country if appears once
-  else if(!country %in% duplicatedCountries$Var1){
-    df <- deathsDataSet %>% 
-    filter(deathsDataSet[2] == country)
-    return(df[ncol(df)])
+  else{
+    # Combine country into one value if appear more then once
+    if(country %in% duplicatedCountries$Var1){
+      df <- deathsDataSet %>% filter(deathsDataSet[2] == country)
+      df<- data.frame( colSums(df[5:numOfCol]))
+      names(df)[1] <- "df"
+      return(df$df[nrow(df)])
+    }
+    # Return country if appears once
+    else if(!country %in% duplicatedCountries$Var1){
+      df <- deathsDataSet %>% 
+        filter(deathsDataSet[2] == country)
+      return(df[ncol(df)])
+    }
   }
 }
 
 returnActiveCases <- function(country){
-  firstDay <- ncol(casesDataSet) - 13
-  lastDay <- ncol(casesDataSet)
-  # Combine country into one value if appear more then once
-  if(country %in% duplicatedCountries$Var1){
-    df <- casesDataSet %>% filter(casesDataSet[2] == country)
-    fourTeenDaysCases <- sum(df[lastDay]) - sum(df[firstDay])
-    return(fourTeenDaysCases)
+  if(country == "Global"){
+    return(totalActiveCases())
   }
-  # Return country if appears once
-  else if(!country %in% duplicatedCountries$Var1){
-    df <- casesDataSet %>% 
-      filter(casesDataSet[2] == country)
-    fourTeenDaysCases <- df[lastDay] - df[firstDay]
-    return(fourTeenDaysCases)
+  else {
+    firstDay <- ncol(casesDataSet) - 13
+    lastDay <- ncol(casesDataSet)
+    # Combine country into one value if appear more then once
+    if(country %in% duplicatedCountries$Var1){
+      df <- casesDataSet %>% filter(casesDataSet[2] == country)
+      fourTeenDaysCases <- sum(df[lastDay]) - sum(df[firstDay])
+      return(fourTeenDaysCases)
+    }
+    # Return country if appears once
+    else if(!country %in% duplicatedCountries$Var1){
+      df <- casesDataSet %>% 
+        filter(casesDataSet[2] == country)
+      fourTeenDaysCases <- df[lastDay] - df[firstDay]
+      return(fourTeenDaysCases)
+    }
   }
+}
+
+returnPercentageOfPopulation <- function(casesNum,countryName){
+  if(countryName == "Global"){
+    population <- sum(pop$population)
+    decimal <- casesNum/population
+  }
+  else{
+    popOfCountry <- pop %>% filter(country == countryName)
+    decimal <- casesNum/popOfCountry$population
+  }
+  percentage <- decimal * 100
+  percentage <- format(round(percentage, 2), nsmall = 2)
+  return(percentage)
 }
 
 returnTitleOfCountryPlots <- function(switchGraphType, switchData){
@@ -138,8 +175,13 @@ returnTitleOfCountryPlots <- function(switchGraphType, switchData){
 }
 
 returnPopulationOfSelctedCountry <- function(countryName){
-  popOfCountry <- pop %>% filter(country == countryName )
-  return(popOfCountry$population)
+  if(countryName == "Global"){
+    return(sum(pop$population))
+  }
+  else{
+    popOfCountry <- pop %>% filter(country == countryName )
+    return(popOfCountry$population) 
+  }
 }
 
 # 4. Interactive plots:
@@ -202,9 +244,9 @@ cummulativePlotCases <- function(countrySelected,daysToForecast){
   forecastData <- createForecastModel(countrySelected,daysToForecast)
   # Change forecast to cumulative
   lastDataPoint <- countrySelected$df[nrow(countrySelected)]
-  forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
+  forecastData$Point.Forecast[1] <- lastDataPoint + forecastData$Point.Forecast[1]
   for(i in 2: nrow(forecastData)){
-    forecastData$forcast[i] <- forecastData$forcast[i] + forecastData$forcast[i -1]
+    forecastData$Point.Forecast[i] <- forecastData$Point.Forecast[i] + forecastData$Point.Forecast[i -1]
   }
   
   plot <-countrySelected %>% hchart("line", 
@@ -241,9 +283,9 @@ cummulativePlotDeaths <- function(countrySelected,daysToForecast){
   forecastData <- createForecastModel(countrySelected,daysToForecast)
   # Change forecast to cumulative
   lastDataPoint <- countrySelected$df[nrow(countrySelected)]
-  forecastData$forcast[1] <- lastDataPoint + forecastData$forcast[1]
+  forecastData$Point.Forecast[1] <- lastDataPoint + forecastData$Point.Forecast[1]
   for(i in 2: nrow(forecastData)){
-    forecastData$forcast[i] <- forecastData$forcast[i] + forecastData$forcast[i -1]
+    forecastData$Point.Forecast[i] <- forecastData$Point.Forecast[i] + forecastData$Point.Forecast[i -1]
   }
   
   plot <-countrySelected %>% hchart("line", 

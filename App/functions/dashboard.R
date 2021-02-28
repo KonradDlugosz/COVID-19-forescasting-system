@@ -14,42 +14,35 @@ colNames <- colnames(casesDataSet)
 date <- colNames[5:numOfCol]
 formatedDate <- as.Date(date, format = "%m/%d/%y")
 
-# 2. Cumulative time series function
-cumulitiveTimeSeries <- function(dataSet){
+
+timeSeriesGlobal <- function(dataSet){
+  # Cumulative
   allCountriesData <- dataSet[5:numOfCol]
   total <- colSums(allCountriesData)
-  timeSeiresCumulative <- data.frame(formatedDate, total)
-  rownames(timeSeiresCumulative) <- NULL
   
-  return(timeSeiresCumulative)
-}
-
-# Time Series Cumulative 
-timeSeiresCasesCumulative <- cumulitiveTimeSeries(casesDataSet)
-timeSeiresRecoveredCumulative <- cumulitiveTimeSeries(recoveredDataSet)
-timeSeiresDeathsCumulative <- cumulitiveTimeSeries(deathsDataSet)
-
-# 3. Daily time series function
-dailyTimeSeries <- function(cumulativeTimeSeries){
-  totalC <- cumulativeTimeSeries[,2]
+  # Daily
   daily <- c()
-  for(i in 1:length(totalC)-1){
-    daily[i] <- totalC[i+1] - totalC[i]
+  for(i in 1:length(total)-1){
+    daily[i] <- total[i+1] - total[i]
   }
-  formatedDate <- formatedDate[-1]
-  dailyTimeSeries <- data.frame(formatedDate, daily )
+  daily <- c(0, daily)
   
-  return(dailyTimeSeries)
+  # Combine and return
+  ts <- data.frame(formatedDate, total, daily )
+  rownames(ts) <- NULL
+  names(ts)[2] <- "df"
+  names(ts)[3] <- "daily"
+  
+  return(ts)
 }
 
-# Time Series Daily
-timeSeiresCasesDaily <- dailyTimeSeries(timeSeiresCasesCumulative)
-timeSeiresRecoveredDaily <- dailyTimeSeries(timeSeiresRecoveredCumulative)
-timeSeiresDeathsDaily <- dailyTimeSeries(timeSeiresDeathsCumulative)
+timeSeiresGlobalCases <- timeSeriesGlobal(casesDataSet)
+timeSeiresGlobalRecovered <- timeSeriesGlobal(recoveredDataSet)
+timeSeiresGlobalDeaths <- timeSeriesGlobal(deathsDataSet)
 
 # Weekly Change 
 weeklyCasesChange <- function(){
-  data <- timeSeiresCasesDaily$daily
+  data <- timeSeiresGlobalCases$daily
   index <- length(data) - 13
   twoWeeksData <- data[index:length(data)]
   
@@ -63,16 +56,16 @@ weeklyCasesChange <- function(){
 
 # Outlier detection and correction 
 # CASES:
-outlier <- outlier(timeSeiresCasesDaily$daily)
-casesMean <- mean(timeSeiresCasesDaily$daily)
-outlierCasesIndex <- match(outlier, timeSeiresCasesDaily$daily)
-timeSeiresCasesDaily$daily[outlierCasesIndex] <- casesMean
+outlier <- outlier(timeSeiresGlobalCases$daily)
+casesMean <- mean(timeSeiresGlobalCases$daily)
+outlierCasesIndex <- match(outlier, timeSeiresGlobalCases$daily)
+timeSeiresGlobalCases$daily[outlierCasesIndex] <- casesMean
 
 # RECOVERED: 
-outlier <- outlier(timeSeiresRecoveredDaily$daily)
-casesMean <- mean(timeSeiresRecoveredDaily$daily)
-outlierRecoveredIndex <- match(outlier, timeSeiresRecoveredDaily$daily)
-timeSeiresRecoveredDaily$daily[outlierRecoveredIndex] <- casesMean
+outlier <- outlier(timeSeiresGlobalRecovered$daily)
+casesMean <- mean(timeSeiresGlobalRecovered$daily)
+outlierRecoveredIndex <- match(outlier, timeSeiresGlobalRecovered$daily)
+timeSeiresGlobalRecovered$daily[outlierRecoveredIndex] <- casesMean
 
 ##### INTERACTVE PLOTS SELECTION ####
 selectDashPlot <- function(dataSelceted, plotSelected){
@@ -107,7 +100,7 @@ selectDashPlot <- function(dataSelceted, plotSelected){
 #### CASES #### 
 dailyCasesPlot <- function(){
   # Daily plot
-  plot <-timeSeiresCasesDaily %>% hchart("line", 
+  plot <-timeSeiresGlobalCases %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Obsereved Cases") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
@@ -117,8 +110,8 @@ dailyCasesPlot <- function(){
 
 cumulativeCasesPlot <- function(){
   # Cumulative plot 
-  plot <-timeSeiresCasesCumulative %>% hchart("line", 
-    hcaes(x = formatedDate , y = total), name = "Obsereved Cases") %>% 
+  plot <-timeSeiresGlobalCases %>% hchart("line", 
+    hcaes(x = formatedDate , y = df), name = "Obsereved Cases") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
   
@@ -126,7 +119,7 @@ cumulativeCasesPlot <- function(){
 }
 dailyRecoveredPlot <- function(){
   # Daily plot
-  plot <-timeSeiresRecoveredDaily %>% hchart("line", 
+  plot <-timeSeiresGlobalRecovered %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Recovered") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Recovered"))
@@ -136,8 +129,8 @@ dailyRecoveredPlot <- function(){
 
 cumulativeRecoveredPlot <- function(){
   # Cumulative plot 
-  plot <-timeSeiresRecoveredCumulative %>% hchart("line", 
-    hcaes(x = formatedDate , y = total), name = "Recovered") %>% 
+  plot <-timeSeiresGlobalRecovered %>% hchart("line", 
+    hcaes(x = formatedDate , y = df), name = "Recovered") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Recovered"))
   
@@ -146,7 +139,7 @@ cumulativeRecoveredPlot <- function(){
 
 dailyDeathsPlot <- function(){
   # Daily deaths plot
-  plot <-timeSeiresDeathsDaily %>% hchart("line", 
+  plot <-timeSeiresGlobalDeaths %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Observed Deaths") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
@@ -155,8 +148,8 @@ dailyDeathsPlot <- function(){
 }
 cumulativeDeathsPlot <- function(){
   # Cumulative deaths 
-  plot <-timeSeiresDeathsCumulative %>% hchart("line", 
-    hcaes(x = formatedDate , y = total), name = "Observed Deaths") %>% 
+  plot <-timeSeiresGlobalDeaths %>% hchart("line", 
+    hcaes(x = formatedDate , y = df), name = "Observed Deaths") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   

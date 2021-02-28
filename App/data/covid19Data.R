@@ -2,7 +2,7 @@
 #### Source for the data used: https://github.com/CSSEGISandData/COVID-19
 #########################################################################
 library (readr)
-### Call data GLOBAL DATA FRAME ###
+### Call data GLOBAL DATA FRAMES ###
 casesDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
 deathsDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
 recoveredDataSet<- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
@@ -17,6 +17,7 @@ activeCases <- function(n){
   names(df)[3] <- "Active"
   return(df)
 }
+
 totalActiveCases <- function(){
   df <- activeCases(13)
   return(sum(df$Active))
