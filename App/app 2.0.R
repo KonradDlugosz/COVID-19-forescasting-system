@@ -123,26 +123,29 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                br()
                                              ),
                                              sidebarPanel( align = "center", id = "sidebarControls",
+                                                           h3("Plot controls"),
                                                            selectInput("country", 
                                                                        choices = retrunListOfCountries(), 
                                                                        label = "Select country: "),
+                                                           selectInput("model", 
+                                                                       choices = c("NNETAR", "ARIMA", "ETS", "BATS"), 
+                                                                       label = "Select model: "),
                                                            radioGroupButtons(inputId = "switchGraphType",label = "Choose graph :", 
                                                                              choices = c(`<i class='fa fa-bar-chart'></i>` = "bar", `<i class='fa fa-line-chart'></i>` = "line"),
-                                                                             justified = TRUE,size = "lg"
+                                                                             justified = TRUE,size = "normal"
                                                            ),
                                                            radioGroupButtons(inputId = "switchData",label = "Choose data :", 
                                                                              choices = c(`<i class="fas fa-head-side-mask"></i>` = "cases",`<i class="fas fa-skull-crossbones"></i>`= "deaths"),
-                                                                             justified = TRUE,size = "lg"
+                                                                             justified = TRUE,size = "normal"
                                                            ),
                                                            column(6 ,align = "right",h3("Moving Average: ")),
                                                            column(6 , align = "left",br(),switchInput(inputId = "movingAverage", value = FALSE)),
                                                            knobInput(inputId = "daysToForecast", label = "Days to forecast:",
-                                                                     value = 14, min = 0, max = 30, displayPrevious = TRUE,
+                                                                     value = 14, min = 2, max = 30, displayPrevious = TRUE,
                                                                      fgColor = "#428BCA",inputColor = "#428BCA"
                                                            ),
                                                            dropdown(style = "jelly", icon = icon("question"), color = "primary",
-                                                                    p(id ="info-label","Use the controls provided to alter the plot. The controls allow to toggle between cases and deaths of a country."),
-                                                                    p(id ="info-label","The forecasting is using faword-feed neural network alogorithm for given number of days use the knob in controls."))
+                                                                    p(id ="info-label","Use the controls provided to alter the plot. The controls allow to toggle between cases and deaths of a country."))
                                              ), 
                                          ),
                                          box(width = 8, solidHeader = TRUE, height = "auto",
@@ -235,7 +238,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$btn_totalDeaths, {
     output$mainTimeSeriesPlot <- renderHighchart({
-      selectDashPlot("deaths", input$switchGraphTypeDashPlot)
+      selectDashPlot("deaths",input$switchGraphTypeDashPlot)
     }) 
     
     output$casesHighChart <- renderHighchart({
@@ -298,7 +301,7 @@ server <- function(input, output, session) {
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
     interactivePlotsMechanism(createTimeSeiresForCountry(input$country, input$switchData),
-                              input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData)
+                              input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData, input$model)
   })
   # Controls for plots
   output$value1 <- renderPrint({ input$switchGraphType })

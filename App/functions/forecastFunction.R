@@ -55,10 +55,15 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod){
   arima <- modelAccuracyCheck(fitarima)
   ets <- modelAccuracyCheck(fitets)
   bats <- modelAccuracyCheck(fcastbats)
-  allAccuracyCheck <- cbind(nnetar,arima,ets,bats)
+  allAccuracyCheck <- data.frame(nnetar,arima,ets,bats)
   
-  # 6. add accuracy results to forecast
+  # 6. add accuracy results to forecast 
+  diff <- nrow(dfForecastedCases) - nrow(allAccuracyCheck)
+  for(i in 1:diff - 1){
+    allAccuracyCheck <- rbind(allAccuracyCheck, c(0,0,0,0))
+  }
   returnData <- cbind(dfForecastedCases,allAccuracyCheck)
+
   return(returnData)
 }
 

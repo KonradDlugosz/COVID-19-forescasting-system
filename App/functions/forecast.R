@@ -185,10 +185,10 @@ returnPopulationOfSelctedCountry <- function(countryName){
 }
 
 # 4. Interactive plots:
-interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData){
+interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData, model){
   if(switchData == "cases"){
     if(plotType == "bar"){
-      return(dailyForecastPlotCases(countrySelected,ema,daysToForecast))
+      return(dailyForecastPlotCases(countrySelected,ema,daysToForecast, model))
     }
     else if(plotType == "line"){
       return(cummulativePlotCases(countrySelected,daysToForecast))
@@ -220,9 +220,9 @@ accurcyTable <- function(countrySelected,daysToForecast){
 #daysToForecast <- 14
 
 #### CASES ####
-dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast){
+dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model){
   # Forecast data
-  forecastData <- createForecastModel(countrySelected,daysToForecast,"NNETAR")
+  forecastData <- createForecastModel(countrySelected,daysToForecast,model)
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data

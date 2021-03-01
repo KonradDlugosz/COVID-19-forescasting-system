@@ -37,6 +37,13 @@ for(i in 1:length(d$Deaths)){
   caseFatalityRate[i] <- paste(format(round(holder, 2), nsmall = 2),"%")
 }
 
+#c1pop <- data.frame(c$`Country/Region`, cases1MPop)
+#names(c1pop)[1] <-"Country/Region"
+#d1pop <- data.frame(c$`Country/Region`, deaths1MPop)
+#names(c1pop)[1] <-"Country/Region"
+
+
+
 df <- data.frame(c,r$Recovered,d$Deaths,cases1MPop, deaths1MPop, caseFatalityRate,popList$population)
 
 names(df)[1] <- "Country"
