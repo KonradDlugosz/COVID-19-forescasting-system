@@ -112,9 +112,18 @@ body {
 }
 
 
-/*PLOTS PAGE*/
-#sidebarControls {
+/*Forecast PAGE*/
+.nav-tabs-custom .nav-tabs li.active:hover a, .nav-tabs-custom .nav-tabs li.active a {
+     background-color: transparent;
+     border-color: transparent;
+}
 
+.nav-tabs-custom .nav-tabs li.active {
+     border-top-color: #FFF;
+}
+
+#plotControlsPanel {
+  background-color: #f2f2f2;
 }
 
 #data_component {

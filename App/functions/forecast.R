@@ -206,7 +206,8 @@ interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToFore
 
 accurcyTable <- function(countrySelected,daysToForecast){
   forecastData <- createForecastModel(countrySelected,daysToForecast)
-  Method <- c("Neural Network", "ARIMA", "Ets", "Bats")
+  Method <- c("Neural Network (ANN)", "Autoregressive integrated moving average (ARIMA)", "Exponential smoothing state space model (ETS)", 
+              "Exponential smoothing with Box-Cox transformation, ARMA errors, Trend and Seasonal components (BATS)")
   rmse <- c( forecastData$nnetar[1], forecastData$arima[1], forecastData$ets[1], forecastData$bats[1] )
   mape <- c( paste(floor(forecastData$nnetar[2]), "%"),paste(floor(forecastData$arima[2]), "%"),
              paste(floor(forecastData$ets[2]), "%"),paste(floor(forecastData$bats[2]), "%") )
