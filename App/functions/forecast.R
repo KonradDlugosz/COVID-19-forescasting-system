@@ -229,9 +229,14 @@ dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model){
   # Plot the data
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Observed") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast", id = "forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Cases"))
+  
+  # Check if confidence level exists
+  if("Lo.95" %in% colnames(forecastData)){
+    plot <- plot %>% hc_add_series(forecastData, type = "arearange", hcaes(x = newDates, low = Lo.95, high = Hi.95), linkedTo = "forecast")
+  }
   # Check if to apply 
   if(isTRUE(ema)){
     plot <- plot %>% hc_add_series(countrySelected, "line", hcaes(formatedDate, EMA), name = "Exponential Moving Average")
@@ -271,6 +276,10 @@ dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast){
     hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
+  # Check if confidence level exists
+  if("Lo.95" %in% colnames(forecastData)){
+    plot <- plot %>% hc_add_series(forecastData, type = "arearange", hcaes(x = newDates, low = Lo.95, high = Hi.95), linkedTo = "forecast")
+  }
   # Check if to apply 
   if(isTRUE(ema)){
     plot <- plot %>% hc_add_series(countrySelected, "line", hcaes(formatedDate, EMA), name = "Exponential Moving Average")

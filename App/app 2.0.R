@@ -194,8 +194,8 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
 server <- function(input, output, session) {
   set.seed(122)
   
-  #--------------------------------Dash starts----------------------------------
-  #### Default on start ####
+  # DASHBAORD STARTS -----------------------------------------------------------
+  ### Default
   #Plot
   output$mainTimeSeriesPlot <- renderHighchart({
     selectDashPlot("cases", input$switchGraphTypeDashPlot)
@@ -266,14 +266,9 @@ server <- function(input, output, session) {
       hcmapSelector("active")
     })
   })
-  
-  # Data Display
-  output$dataDisplay <- renderDataTable({
-    df
-  })
 
-  # Dash Ends ------------------------------------------------------------------
-  # Plots Start ----------------------------------------------------------------
+  # DASHBAORD Ends -------------------------------------------------------------
+  # FORECAST Start -------------------------------------------------------------
   # Display country situation numbers
   output$casesInCountry <- renderText({
     formatLargeNumber(returnSumCasesOfCountry(createTimeSeiresForCountry(input$country, "cases"),input$country))
@@ -303,6 +298,20 @@ server <- function(input, output, session) {
     paste( returnPercentageOfPopulation(returnActiveCases(input$country),input$country), "%", "of population" )
   })
   
+  # Display Country selected
+  output$selectedCountryDisplay <- renderText({
+    input$country
+  })
+  # Display population of selected country
+  output$population <- renderText({
+    paste("Population: ",formatLargeNumber(returnPopulationOfSelctedCountry(input$country)))
+  })
+  
+  # Display title for plot
+  output$countryPlotTitle <- renderText({
+    returnTitleOfCountryPlots(input$switchGraphType,input$switchData)
+  })
+  
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
     interactivePlotsMechanism(createTimeSeiresForCountry(input$country, input$switchData),
@@ -311,18 +320,10 @@ server <- function(input, output, session) {
   # Controls for plots
   output$value1 <- renderPrint({ input$switchGraphType })
   output$value2 <- renderPrint({ input$switchData })
+  
   # Accuracy for forecast
   output$accuracyTable <- renderTable({ 
     accurcyTable(createTimeSeiresForCountry(input$country,input$switchData),input$daysToForecast) 
-  })
-  
-  # Display Country selected
-  output$selectedCountryDisplay <- renderText({
-    input$country
-  })
-  # Display population of selected country
-  output$population <- renderText({
-    paste("Population: ",formatLargeNumber(returnPopulationOfSelctedCountry(input$country)))
   })
   
   useSweetAlert()
@@ -335,6 +336,7 @@ server <- function(input, output, session) {
       type = "info"
     )
   })
+  # Display info of MAPE
   observeEvent(input$MAPEInfo, {
     sendSweetAlert(
       session = session,
@@ -344,20 +346,15 @@ server <- function(input, output, session) {
     )
   })
   
-  # Display title for plot
-  output$countryPlotTitle <- renderText({
-    returnTitleOfCountryPlots(input$switchGraphType,input$switchData)
-  })
-  
   # Display seasonality of selected country
   output$sesonality <- renderHighchart({
     decomposeDataOfSelectedCountry(createTimeSeiresForCountry(input$country,input$switchData))
   })
   
-  # Plots Ends -----------------------------------------------------------------
-  
-  output$testData <- renderTable({
-    casesDataSet
+  # FORECAST Ends -----------------------------------------------------------------
+  # EXPLORE DATA  -----------------------------------------------------------------
+  output$dataDisplay <- renderDataTable({
+    df
   })
   
 }

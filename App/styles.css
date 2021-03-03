@@ -122,6 +122,9 @@ body {
      border-top-color: #FFF;
 }
 
+.highcharts-area {
+  fill-opacity: 0.2;
+}
 #plotControlsPanel {
   background-color: #f2f2f2;
 }
