@@ -31,17 +31,23 @@ deaths1MPop <- c()
 for(i in 1:length(d$Deaths)){
   deaths1MPop[i]  <- ceiling(d$Deaths[i]/popList$population[i] * 1000000)
 }
+recovered1MPop <- c()
+for(i in 1:length(r$Recovered)){
+  recovered1MPop[i]  <- ceiling(r$Recovered[i]/popList$population[i] * 1000000)
+}
+
 caseFatalityRate <- c()
 for(i in 1:length(d$Deaths)){
   holder <- d$Deaths[i] / c$Cases[i] * 100
   caseFatalityRate[i] <- paste(format(round(holder, 2), nsmall = 2),"%")
 }
 
-#c1pop <- data.frame(c$`Country/Region`, cases1MPop)
-#names(c1pop)[1] <-"Country/Region"
-#d1pop <- data.frame(c$`Country/Region`, deaths1MPop)
-#names(c1pop)[1] <-"Country/Region"
-
+c1pop <- data.frame(c$`Country/Region`, cases1MPop)
+names(c1pop)[1] <-"Country/Region"
+d1pop <- data.frame(d$`Country/Region`, deaths1MPop)
+names(d1pop)[1] <-"Country/Region"
+r1pop <- data.frame(r$`Country/Region`, recovered1MPop)
+names(r1pop)[1] <-"Country/Region"
 
 
 df <- data.frame(c,r$Recovered,d$Deaths,cases1MPop, deaths1MPop, caseFatalityRate,popList$population)

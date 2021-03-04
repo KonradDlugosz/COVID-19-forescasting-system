@@ -193,7 +193,6 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                inline = TRUE, 
                                                status = "danger"
                                                ),
-                                             br(),
                                              ),
                                          dataTableOutput("dataDisplay")
                                          )
@@ -218,7 +217,7 @@ server <- function(input, output, session) {
   
   # Map
   output$dashMap <- renderHighchart({
-    hcmapSelector("cases")
+    hcmapSelector("cases", input$mapControl)
   })
   
   # Main Buttons 
@@ -233,7 +232,7 @@ server <- function(input, output, session) {
     })
     # Map
     output$dashMap <- renderHighchart({
-      hcmapSelector("cases")
+      hcmapSelector("cases", input$mapControl)
     })
     
   })
@@ -248,7 +247,7 @@ server <- function(input, output, session) {
     })
     
     output$dashMap <- renderHighchart({
-      hcmapSelector("recovered")
+      hcmapSelector("recovered", input$mapControl)
     })
   })
   
@@ -262,7 +261,7 @@ server <- function(input, output, session) {
     })
     
     output$dashMap <- renderHighchart({
-      hcmapSelector("deaths")
+      hcmapSelector("deaths", input$mapControl)
     })
   })
   
@@ -274,7 +273,7 @@ server <- function(input, output, session) {
       pieControler("active")
     })
     output$dashMap <- renderHighchart({
-      hcmapSelector("active")
+      hcmapSelector("active", input$mapControl)
     })
   })
 
