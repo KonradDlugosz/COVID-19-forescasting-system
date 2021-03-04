@@ -23,6 +23,7 @@ source("functions/forecast.R")
 source("functions/forecastFunction.R")
 source("functions/pieChart.R")
 source("functions/mapHighChart.R")
+source("functions/exploreDataFunctions.R")
 
 ### Shiny app ###
 ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme =  shinytheme("yeti"),
@@ -108,12 +109,11 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                              column(3, h2("Active"), h3(id= "activecases_text",textOutput("activeInCountry")),h4(id ="info-label",textOutput("percentageActive")))
                                          ),
                                          box(width = 12, solidHeader = TRUE, height = "auto",
-                                             
-                                             box(width = 8, solidHeader = TRUE, height = "auto",
+                                             box(width = 9, solidHeader = TRUE, height = "auto",
                                                  h3(textOutput("countryPlotTitle")),
                                                  shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily"))
                                                  ),
-                                             tabBox(width = 4, height = "auto", 
+                                             tabBox(width = 3, height = "auto", 
                                                tabPanel("Plot", id = "plotControlsPanel",
                                                         h3("Plot controls"),
                                                         selectInput("country", 
@@ -184,6 +184,17 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                      box(solidHeader = TRUE, width = 12,
                                          h2("Explore data"),
                                          br(),
+                                         box(width = 12, solidHeader = TRUE,
+                                             awesomeCheckboxGroup(
+                                               inputId = "filterColumnsControls",
+                                               label = "Filter Columns:", 
+                                               choices = c("Cases", "Recovered", "Deaths","Cases/1M Population", "Deaths/1M Population","Cases fatality ratio","Population"),
+                                               selected = c("Cases", "Recovered", "Deaths","Cases/1M Population", "Deaths/1M Population","Cases fatality ratio","Population"),
+                                               inline = TRUE, 
+                                               status = "danger"
+                                               ),
+                                             br(),
+                                             ),
                                          dataTableOutput("dataDisplay")
                                          )
                                      )
@@ -353,8 +364,10 @@ server <- function(input, output, session) {
   
   # FORECAST Ends -----------------------------------------------------------------
   # EXPLORE DATA  -----------------------------------------------------------------
-  output$dataDisplay <- renderDataTable({
-    df
+  observeEvent(input$filterColumnsControls, {
+    output$dataDisplay <- renderDataTable({
+      returnFilteredColumns(input$filterColumnsControls)
+    })
   })
   
 }
