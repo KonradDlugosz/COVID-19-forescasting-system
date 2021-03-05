@@ -191,15 +191,15 @@ interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToFore
       return(dailyForecastPlotCases(countrySelected,ema,daysToForecast, model))
     }
     else if(plotType == "line"){
-      return(cummulativePlotCases(countrySelected,daysToForecast))
+      return(cummulativePlotCases(countrySelected,daysToForecast, model))
     }
   }
   else if(switchData == "deaths"){
     if(plotType == "bar"){
-      return(dailyForecastPlotDeaths(countrySelected,ema,daysToForecast))
+      return(dailyForecastPlotDeaths(countrySelected,ema,daysToForecast, model))
     }
     else if(plotType == "line"){
-      return(cummulativePlotDeaths(countrySelected,daysToForecast))
+      return(cummulativePlotDeaths(countrySelected,daysToForecast , model))
     }
   }
 } 
@@ -245,9 +245,9 @@ dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model){
   return(plot)
 }
 
-cummulativePlotCases <- function(countrySelected,daysToForecast){
+cummulativePlotCases <- function(countrySelected,daysToForecast,model){
   # Forecast data
-  forecastData <- createForecastModel(countrySelected,daysToForecast)
+  forecastData <- createForecastModel(countrySelected,daysToForecast,model)
   # Change forecast to cumulative
   lastDataPoint <- countrySelected$df[nrow(countrySelected)]
   forecastData$Point.Forecast[1] <- lastDataPoint + forecastData$Point.Forecast[1]
@@ -265,15 +265,15 @@ cummulativePlotCases <- function(countrySelected,daysToForecast){
 }
 
 #### DEATHS ####
-dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast){
+dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast, model){
   # Forecast data
-  forecastData <- createForecastModel(countrySelected,daysToForecast)
+  forecastData <- createForecastModel(countrySelected,daysToForecast, model)
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data
   plot <-countrySelected %>% hchart("line", 
     hcaes(x = formatedDate , y = daily), name = "Observed") %>% 
-    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast") %>% 
+    hc_add_series(forecastData, "line", hcaes(newDates, Point.Forecast), name = "Forecast", id = "forecast") %>% 
     hc_xAxis(title = list(text = "Dates")) %>% 
     hc_yAxis(title = list(text = "Deaths"))
   # Check if confidence level exists
@@ -288,9 +288,9 @@ dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast){
   return(plot)
 }
 
-cummulativePlotDeaths <- function(countrySelected,daysToForecast){
+cummulativePlotDeaths <- function(countrySelected,daysToForecast , model){
   # Forecast data
-  forecastData <- createForecastModel(countrySelected,daysToForecast)
+  forecastData <- createForecastModel(countrySelected,daysToForecast, model)
   # Change forecast to cumulative
   lastDataPoint <- countrySelected$df[nrow(countrySelected)]
   forecastData$Point.Forecast[1] <- lastDataPoint + forecastData$Point.Forecast[1]
