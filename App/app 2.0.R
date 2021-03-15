@@ -109,11 +109,16 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                              column(3, h2("Active"), h3(id= "activecases_text",textOutput("activeInCountry")),h4(id ="info-label",textOutput("percentageActive")))
                                          ),
                                          box(width = 12, solidHeader = TRUE, height = "auto",
-                                             box(width = 9, solidHeader = TRUE, height = "auto",
+                                             box(width = 8, solidHeader = TRUE, height = "auto",
                                                  h3(textOutput("countryPlotTitle")),
-                                                 shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily"))
+                                                 shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily")),
+                                                 h3("Model Accuracy"),
+                                                 tableOutput("accuracyTable"),
+                                                 actionBttn("RMSEInfo", " RMSE Info", style = "stretch", color = "primary"),
+                                                 actionBttn("MAPEInfo", " MAPE Info", style = "stretch", color = "primary"),
+                                                 br()
                                                  ),
-                                             tabBox(width = 3, height = "auto", 
+                                             tabBox(width = 4, height = "auto", 
                                                tabPanel("Plot", id = "plotControlsPanel",
                                                         h3("Plot controls"),
                                                         selectInput("country", 
@@ -129,6 +134,8 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                                           ),
                                                         h4("Moving Average: "),
                                                         switchInput(inputId = "movingAverage", value = FALSE),
+                                                        h4("Fitted model: "),
+                                                        switchInput(inputId = "fittedModel", value = FALSE),
                                                         dropdown(style = "jelly", icon = icon("question"), color = "primary",
                                                                  p(id ="info-label","Use the controls provided to alter the plot. The controls allow to toggle between cases and deaths of a country."))
                                                         
@@ -145,14 +152,6 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                                   )
                                                         )
                                              ),
-                                         ),
-                                         
-                                         box(width = 12, solidHeader = TRUE, height = "auto",
-                                             h3("Model Accuracy"),
-                                             tableOutput("accuracyTable"),
-                                             actionBttn("RMSEInfo", " RMSE Info", style = "stretch", color = "primary"),
-                                             actionBttn("MAPEInfo", " MAPE Info", style = "stretch", color = "primary"),
-                                             br()
                                          ),
                                          box(width = 12, solidHeader = TRUE, height = "auto",
                                              h3("View of Data Decomposition"),
@@ -325,7 +324,7 @@ server <- function(input, output, session) {
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
     interactivePlotsMechanism(createTimeSeiresForCountry(input$country, input$switchData),
-                              input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData, input$model)
+                              input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData, input$model, input$fittedModel)
   })
   # Controls for plots
   output$value1 <- renderPrint({ input$switchGraphType })

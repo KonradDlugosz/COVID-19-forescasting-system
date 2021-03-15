@@ -185,10 +185,10 @@ returnPopulationOfSelctedCountry <- function(countryName){
 }
 
 # 4. Interactive plots:
-interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData, model){
+interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData, model , fitControl){
   if(switchData == "cases"){
     if(plotType == "bar"){
-      return(dailyForecastPlotCases(countrySelected,ema,daysToForecast, model))
+      return(dailyForecastPlotCases(countrySelected,ema,daysToForecast, model,fitControl))
     }
     else if(plotType == "line"){
       return(cummulativePlotCases(countrySelected,daysToForecast, model))
@@ -221,7 +221,7 @@ accurcyTable <- function(countrySelected,daysToForecast){
 #daysToForecast <- 14
 
 #### CASES ####
-dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model){
+dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model, fitted){
   # Forecast data
   forecastData <- createForecastModel(countrySelected,daysToForecast,model)
   # Exponential Moving Average
@@ -237,9 +237,14 @@ dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model){
   if("Lo.95" %in% colnames(forecastData)){
     plot <- plot %>% hc_add_series(forecastData, type = "arearange", hcaes(x = newDates, low = Lo.95, high = Hi.95), linkedTo = "forecast")
   }
-  # Check if to apply 
+  # Check if to apply moving average 
   if(isTRUE(ema)){
     plot <- plot %>% hc_add_series(countrySelected, "line", hcaes(formatedDate, EMA), name = "Exponential Moving Average")
+  }
+  # check if fitted model should be plotted
+  if(isTRUE(fitted)){
+    fittedModelData <- createForecastModel(countrySelected,daysToForecast,model, TRUE)
+    plot <- plot %>% hc_add_series(fittedModelData, "line", hcaes(x = date,y = fitted), name = "Fitted Model")
   }
   
   return(plot)

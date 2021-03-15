@@ -1,6 +1,6 @@
 # This file contains forecasting methods
 #### Neural Network forward feed time series forecast function ####
-createForecastModel <- function(countrySelected,daysToForecast, modelMethod){
+createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fittedReturn){
   # Defaults
   if(missing(daysToForecast)){
     daysToForecast = 14
@@ -8,14 +8,17 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod){
   if(missing(modelMethod)){
     modelMethod = "NNETAR"
   }
+  if(missing(fittedReturn)){
+    fittedReturn = FALSE
+  }
   # 1. Load and format data
   data <- countrySelected
   df <- ts(data[,3])
   
   # 2. Train models
   #### NNETAR MODEL
-  fitnnetar <- nnetar(df, repeats = 20)
-  fcastnnetar <- forecast(fitnnetar, h = daysToForecast, level = 95)
+  fitnnetar <- nnetar(ts(df,frequency=7), repeats = 20)
+  fcastnnetar <- forecast(fitnnetar, h = daysToForecast)
   ### ARIMA MODEL
   fitarima <- auto.arima(ts(df,frequency=7))
   fcastarima <- forecast(fitarima, h = daysToForecast, level = 95)
@@ -50,6 +53,13 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod){
     dfForecastedCases <- data.frame(newDates, fcastbats)
   }
   
+  # Check for negative values in forecast
+  for(i in 1:length(dfForecastedCases$Point.Forecast)){
+    if(dfForecastedCases$Point.Forecast[i] < 0){
+      dfForecastedCases$Point.Forecast[i] <- 0
+    }
+  }
+  
   # 5. Check the accuracy of the models
   nnetar <- modelAccuracyCheck(fitnnetar)
   arima <- modelAccuracyCheck(fitarima)
@@ -63,8 +73,28 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod){
     allAccuracyCheck <- rbind(allAccuracyCheck, c(0,0,0,0))
   }
   returnData <- cbind(dfForecastedCases,allAccuracyCheck)
-
-  return(returnData)
+  
+  #Check if fitted model should be returned
+  if(fittedReturn == TRUE){
+    if(modelMethod == "NNETAR"){
+      fittedModel <- data.frame(data$formatedDate, fcastnnetar$fitted)
+    }
+    if(modelMethod == "ARIMA"){
+      fittedModel <- data.frame(data$formatedDate, fcastarima$fitted)
+    }
+    if(modelMethod == "ETS"){
+      fittedModel <- data.frame(data$formatedDate, fcastets$fitted)
+    }
+    if(modelMethod == "BATS"){
+      fittedModel <- data.frame(data$formatedDate, fcastbats$fitted)
+    }
+    names(fittedModel)[1] <- "date"
+    names(fittedModel)[2] <- "fitted"
+    return(fittedModel)
+  }
+  else{
+    return(returnData)
+  }
 }
 
 modelAccuracyCheck <- function(fit){
@@ -90,13 +120,8 @@ modelAccuracyCheck <- function(fit){
 }
 
 ### test functions 
-#countrySelected <- createTimeSeiresForCountry("Poland", "cases")
+#countrySelected <- createTimeSeiresForCountry("Luxembourg", "cases")
 #createForecastModel(countrySelected)
-### PLOT ARIMA MODEL Forecast
-#plot(forecast(auto.arima(ts(df,frequency=7)),h=30))
-
-### PLOT ETS MODELFORECAST
-#plot(forecast(ets(ts(df,frequency=7)),h=30))
 
 #### Other functions ####
 # Normalize function 
