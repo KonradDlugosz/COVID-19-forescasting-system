@@ -1,21 +1,24 @@
-# COVID-19 Forescasting-system 
+# COVID-19 Visualsation and Forecast
+## Description
+This is a system that enables users to view current global situation of COVID 19 which is represneted using:
+* Map
+* Pie chart
+* Daily and Cumulative plot.
+
+This system provides visualization of the data, for example, using time series plots to display daily number of cases, deaths, recovered and active cases around the globe.
+Choropleth maps to indicate effected areas in individual countries as well as pie chart to view what part individual countries represent of global situation. 
+These functionalities will help users to understand analyzed data in a clear way. 
 
 ![](App/Images/dashboard.PNG)
-> Dashboard of the system representing situation
-## Description
-This is a system that enables users to view current global situation of COVID 19.
-It main functionality is to forecast cases for individual countries.
-
-This system provides visualization of the data, for example, using time series plots,
-choropleth maps to indicate effected areas. These will help users to understand analyzed
-data in a clear way. Moreover, the historical data is used to predict future events and to 
-build models that highlight important trends.
-Furthermore, these models are used on train data which will try to predict future cases or deaths.
-This might me very helpful in predicting an outbreak of particular country.
+> Dashboard of the system Visualizing global situation.
 
 ## Forecast
-![](App/Images/forecast.png)
-> The forecast is using forward-feed neural network algorithm.
-
+The historical data is used to train diffrent types of models which then they can be used to predict number of cases to some level of ceretainy. 
+This might me very helpful in predicting an outbreak of particular country. Of course these models will perform difrent, therefore they need to be messured and comapred for optimal performance.
 The accuracy is measured using root mean square error which shows on average, how many values the forecast was away from actual.
-This varies between country but it gives an idea of how accurate the forecast can be. 
+It's also messured using mean absolute percetange error which shows ... 
+This varies between country but it gives an idea of how accurate the forecast can be.
+
+![](App/Images/forecast.png)
+> The forecast page
+
