@@ -40,8 +40,12 @@ This varies between country but it gives an idea of how accurate the forecast ca
 
 The plot can be modified using controls provided which are divided for plot and forecast: 
 ![](App/Images/plot_controls.PNG)
->Plot controls:
+>Plot controls
 
 ![](App/Images/forecast_controls.PNG)
-> Forecast controls:
+> Forecast controls
 
+## Explore data
+This page allows the user to freely inspect the data and filter the columns by using the controls provided:
+![](App/Images/data_expo.PNG)
+> Data exploration
