@@ -1,9 +1,16 @@
 # COVID-19 Visualsation and Forecast
 ## Description
 This is a system that enables users to view current global situation of COVID 19 which is represneted using:
+
+## Dashboard functions:
 * Map
+![](App/Images/Map_cases.PNG)
 * Pie chart
+
+![](App/Images/Pie_cases.PNG)
 * Daily and Cumulative plot.
+
+![](App/Images/plot_cases.PNG)
 
 This system provides visualization of the data, for example, using time series plots to display daily number of cases, deaths, recovered and active cases around the globe.
 Choropleth maps to indicate effected areas in individual countries as well as pie chart to view what part individual countries represent of global situation. 
