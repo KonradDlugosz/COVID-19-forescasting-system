@@ -185,10 +185,10 @@ returnPopulationOfSelctedCountry <- function(countryName){
 }
 
 # 4. Interactive plots:
-interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData, model , fitControl){
+interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToForecast, switchData, model , fitControl, testForecast){
   if(switchData == "cases"){
     if(plotType == "bar"){
-      return(dailyForecastPlotCases(countrySelected,ema,daysToForecast, model,fitControl))
+      return(dailyForecastPlotCases(countrySelected,ema,daysToForecast, model,fitControl,testForecast))
     }
     else if(plotType == "line"){
       return(cummulativePlotCases(countrySelected,daysToForecast, model))
@@ -196,7 +196,7 @@ interactivePlotsMechanism <- function(countrySelected, plotType, ema, daysToFore
   }
   else if(switchData == "deaths"){
     if(plotType == "bar"){
-      return(dailyForecastPlotDeaths(countrySelected,ema,daysToForecast, model))
+      return(dailyForecastPlotDeaths(countrySelected,ema,daysToForecast, model,testForecast))
     }
     else if(plotType == "line"){
       return(cummulativePlotDeaths(countrySelected,daysToForecast , model))
@@ -217,13 +217,14 @@ accurcyTable <- function(countrySelected,daysToForecast){
   
   return(df)
 }
-#countrySelected <- createTimeSeiresForCountry("Poland","cases")
-#daysToForecast <- 14
+countrySelected <- createTimeSeiresForCountry("Poland","cases")
+testForecast <- TRUE
+daysToForecast <- 14
 
 #### CASES ####
-dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model, fitted){
+dailyForecastPlotCases <- function(countrySelected, ema, daysToForecast, model, fitted,testForecast){
   # Forecast data
-  forecastData <- createForecastModel(countrySelected,daysToForecast,model)
+  forecastData <- createForecastModel(countrySelected,daysToForecast,model,FALSE, testForecast)
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data
@@ -270,9 +271,9 @@ cummulativePlotCases <- function(countrySelected,daysToForecast,model){
 }
 
 #### DEATHS ####
-dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast, model){
+dailyForecastPlotDeaths <- function(countrySelected, ema, daysToForecast, model,testForecast){
   # Forecast data
-  forecastData <- createForecastModel(countrySelected,daysToForecast, model)
+  forecastData <- createForecastModel(countrySelected,daysToForecast, model,FALSE, testForecast)
   # Exponential Moving Average
   countrySelected$EMA <- TTR::EMA(countrySelected$daily, n = 7)
   # Plot the data

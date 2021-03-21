@@ -55,22 +55,6 @@ body {
   background-color: #e6e6e6;
 }
 
-
-#btn_plots, #btn_virus,#btn_about{
-  width: 130px;
-  height: 130px;
-  font-size: 70px;
-  color: #0066ff;
-  border-radius: 10px;
-  background-color: #ffffff;
-  border-color: #ffffff;
-  
-}
-#btn_plots:hover, #btn_virus:hover{
-  color: #0052cc;
-  background-color: #e6e6e6;
-}
-
 #increase {
   color:#808080;
 }
@@ -125,6 +109,7 @@ body {
 .highcharts-area {
   fill-opacity: 0.2;
 }
+
 #plotControlsPanel {
   background-color: #f2f2f2;
 }
@@ -146,45 +131,6 @@ body {
 #remainder_component{
   color: #e6e600;
   font-weight: bold;
-}
-
-/*MAP*/
-
-#stats {
-  /* Appearance */
-  background-color: white;
-  padding: 0 50px 10px 10px;
-  cursor: move;
-  opacity: 0.7;
-  transition: opacity 500ms 1s;
-}
-#stats.thick {
-  font-weight: bold;
-}
-
-#controls {
-  /* Appearance */
-  background-color: white;
-  padding: 0 50px 10px 10px;
-  cursor: move;
-  opacity: 0.7;
-  transition: opacity 500ms 1s;
-}
-
-#map-info-new { 
-  padding-left: 10px;
-  color:#610000;
-  font-style: oblique;
-}
-
-#map-info-confirmed {
-  padding-left: 10px;
-  color:#6d4f4f;
-  font-style: oblique;
-}
-
-#controls-buttons{
-  padding-left: 20px;
 }
 
 /* Buttons Appearance */

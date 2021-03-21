@@ -136,6 +136,8 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                                         switchInput(inputId = "movingAverage", value = FALSE),
                                                         h4("Fitted model: "),
                                                         switchInput(inputId = "fittedModel", value = FALSE),
+                                                        h4("Test forecast: "),
+                                                        switchInput(inputId = "testForecast", value = FALSE),
                                                         dropdown(style = "jelly", icon = icon("question"), color = "primary",
                                                                  p(id ="info-label","Use the controls provided to alter the plot. The controls allow to toggle between cases and deaths of a country."))
                                                         
@@ -324,7 +326,7 @@ server <- function(input, output, session) {
   # Interactive plots 
   output$selectedCountryPlotDaily <- renderHighchart({
     interactivePlotsMechanism(createTimeSeiresForCountry(input$country, input$switchData),
-                              input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData, input$model, input$fittedModel)
+                              input$switchGraphType, input$movingAverage,input$daysToForecast, input$switchData, input$model, input$fittedModel, input$testForecast)
   })
   # Controls for plots
   output$value1 <- renderPrint({ input$switchGraphType })

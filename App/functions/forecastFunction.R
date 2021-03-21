@@ -1,6 +1,6 @@
 # This file contains forecasting methods
 #### Neural Network forward feed time series forecast function ####
-createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fittedReturn){
+createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fittedReturn, testForecast){
   # Defaults
   if(missing(daysToForecast)){
     daysToForecast = 14
@@ -11,8 +11,16 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fitt
   if(missing(fittedReturn)){
     fittedReturn = FALSE
   }
+  if(missing(testForecast)){
+    testForecast = FALSE
+  }
   # 1. Load and format data
   data <- countrySelected
+  
+  # Check if the data should contain the test data (daysToForecast)
+  if(testForecast == TRUE){
+    data <- head(data, -daysToForecast)
+  }
   df <- ts(data[,3])
   
   # 2. Train models
@@ -120,8 +128,8 @@ modelAccuracyCheck <- function(fit){
 }
 
 ### test functions 
-#countrySelected <- createTimeSeiresForCountry("Luxembourg", "cases")
-#createForecastModel(countrySelected)
+#countrySelected <- createTimeSeiresForCountry("Poland", "cases")
+#createForecastModel(countrySelected, 14,"NNETAR",FALSE, TRUE )
 
 #### Other functions ####
 # Normalize function 
