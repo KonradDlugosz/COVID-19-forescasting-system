@@ -14,6 +14,8 @@ library(shinyalert)
 library(forecast)
 library(highcharter)
 library(shinythemes)
+library(readr)
+library(dplyr)
 
 ### Sources ####
 source("data/covid19Data.R")
@@ -112,11 +114,16 @@ ui <- navbarPage("COVID-19", id = "navbarMenu", position = "fixed-top", theme = 
                                              box(width = 8, solidHeader = TRUE, height = "auto",
                                                  h3(textOutput("countryPlotTitle")),
                                                  shinycssloaders::withSpinner(highchartOutput("selectedCountryPlotDaily")),
-                                                 h3("Model Accuracy"),
-                                                 tableOutput("accuracyTable"),
-                                                 actionBttn("RMSEInfo", " RMSE Info", style = "stretch", color = "primary"),
-                                                 actionBttn("MAPEInfo", " MAPE Info", style = "stretch", color = "primary"),
-                                                 br()
+                                                 column(9,
+                                                        h3("Model Accuracy"),
+                                                        tableOutput("accuracyTable"),
+                                                        actionBttn("RMSEInfo", " RMSE Info", style = "stretch", color = "primary"),
+                                                        actionBttn("MAPEInfo", " MAPE Info", style = "stretch", color = "primary"),
+                                                        br()),
+                                                 column(3,
+                                                        h3("Forecast Accuracy"),
+                                                        textOutput("forecastAccuracy"))
+
                                                  ),
                                              tabBox(width = 4, height = "auto", 
                                                tabPanel("Plot", id = "plotControlsPanel",
@@ -332,10 +339,15 @@ server <- function(input, output, session) {
   output$value1 <- renderPrint({ input$switchGraphType })
   output$value2 <- renderPrint({ input$switchData })
   
-  # Accuracy for forecast
+  # Accuracy for model fit
   output$accuracyTable <- renderTable({ 
     accurcyTable(createTimeSeiresForCountry(input$country,input$switchData),input$daysToForecast) 
   })
+  # Accuracy for forecast test
+  output$forecastAccuracy <- renderText({ 
+    paste( "RMSE:" , createForecastModel(createTimeSeiresForCountry(input$country, input$switchData), input$daysToForecast,input$model,input$fittedModel, TRUE , TRUE ) )
+  })
+  
   
   useSweetAlert()
   # Display info of RMSE

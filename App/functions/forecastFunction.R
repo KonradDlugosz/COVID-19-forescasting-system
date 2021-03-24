@@ -1,6 +1,6 @@
 # This file contains forecasting methods
 #### Neural Network forward feed time series forecast function ####
-createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fittedReturn, testForecast){
+createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fittedReturn, testForecast, testForecastReturn){
   # Defaults
   if(missing(daysToForecast)){
     daysToForecast = 14
@@ -13,6 +13,9 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fitt
   }
   if(missing(testForecast)){
     testForecast = FALSE
+  }
+  if(missing(testForecastReturn)){
+    testForecastReturn = FALSE
   }
   # 1. Load and format data
   data <- countrySelected
@@ -67,13 +70,21 @@ createForecastModel <- function(countrySelected,daysToForecast, modelMethod,fitt
       dfForecastedCases$Point.Forecast[i] <- 0
     }
   }
-  
-  # 5. Check the accuracy of the models
-  nnetar <- modelAccuracyCheck(fitnnetar)
-  arima <- modelAccuracyCheck(fitarima)
-  ets <- modelAccuracyCheck(fitets)
-  bats <- modelAccuracyCheck(fcastbats)
-  allAccuracyCheck <- data.frame(nnetar,arima,ets,bats)
+
+  # 5. Accuracy 
+  if(testForecastReturn == TRUE){
+    # Test forecast
+    test <- tail(countrySelected, daysToForecast)
+    return(testForecastAccuracy(daysToForecast,dfForecastedCases,test))
+  }
+  else{
+    # Check the accuracy of the models
+    nnetar <- modelAccuracyCheck(fitnnetar)
+    arima <- modelAccuracyCheck(fitarima)
+    ets <- modelAccuracyCheck(fitets)
+    bats <- modelAccuracyCheck(fcastbats)
+    allAccuracyCheck <- data.frame(nnetar,arima,ets,bats)
+  }
   
   # 6. add accuracy results to forecast 
   diff <- nrow(dfForecastedCases) - nrow(allAccuracyCheck)
@@ -127,9 +138,21 @@ modelAccuracyCheck <- function(fit){
   return(c(rootMeanSquaredError,meanAbsolutePercentError))
 }
 
+testForecastAccuracy <- function(daysToForecast, fit, testdata){
+  residuals <- c()
+  for(i in 1:daysToForecast){
+    residuals[i] <- fit$Point.Forecast[i] - testdata$daily[i]
+  }
+  squereError <- na.omit(residuals) ^ 2
+  meanSquereError <- mean(squereError)
+  rootMeanSquaredError <- sqrt(meanSquereError)
+  
+  return(rootMeanSquaredError)
+}
+
 ### test functions 
 #countrySelected <- createTimeSeiresForCountry("Poland", "cases")
-#createForecastModel(countrySelected, 14,"NNETAR",FALSE, TRUE )
+#createForecastModel(countrySelected, 14,"NNETAR",FALSE, TRUE, TRUE )
 
 #### Other functions ####
 # Normalize function 
