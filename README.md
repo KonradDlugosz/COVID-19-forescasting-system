@@ -29,11 +29,7 @@ These functionalities will help users to understand analyzed data in a clear way
 > Plot for daily number of cases globally
 > 
 ## Forecast
-The historical data is used to train diffrent types of models which then they can be used to predict number of cases to some level of ceretainy. 
-This might me very helpful in predicting an outbreak of particular country. Of course these models will perform difrent, therefore they need to be messured and comapred for optimal performance.
-The accuracy is measured using root mean square error which shows on average, how many values the forecast was away from actual.
-It's also messured using mean absolute percetange error which shows ... 
-This varies between country but it gives an idea of how accurate the forecast can be.
+The historical data is used to train different types of models like neural network or ARIMA which then they can be used to predict number of cases to some level of certainty. This might me very helpful in predicting an outbreak of particular country. Of course, these models will perform different depending on the data, therefore they need to be measured and compared for optimal performance. The accuracy is measured using root mean square error which shows on average, how many values the forecast was away from actual. It is also measured using mean absolute percentage error, its calculated by dividing the absolute error by actual value and then converting it into a percentage. This varies between country, but it gives an idea of how accurate the forecast can be.
 
 ![](App/Images/forecast_screenshot.PNG)
 > The forecast page
