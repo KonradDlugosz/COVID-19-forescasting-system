@@ -1,0 +1,13 @@
+name: COVID-19
+title: COVID-19
+username:
+account: covid-19forecasting
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3846305
+bundleId: 4784459
+url: https://covid-19forecasting.shinyapps.io/COVID-19/
+when: 1625348132.3465
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|Old Version/app - 1.0.R

@@ -16,7 +16,9 @@ d <- d %>% group_by(`Country/Region`) %>% summarise(Deaths = sum(lastDate))
 r <- r %>% group_by(`Country/Region`) %>% summarise(Recovered = sum(lastDate))
 
 popList <- pop[order(pop$country),]
-popList <- popList[-c(132,189),]
+#TODO GIVES ERROR
+#popList <- popList[-c(132,189),]
+
 
 c <- c[-c(49,118),]
 d <- d[-c(49,118),]
@@ -51,6 +53,7 @@ names(r1pop)[1] <-"Country/Region"
 
 
 df <- data.frame(c,r$Recovered,d$Deaths,cases1MPop, deaths1MPop, caseFatalityRate,popList$population)
+
 
 names(df)[1] <- "Country"
 names(df)[3] <- "Recovered"
